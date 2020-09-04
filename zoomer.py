@@ -1,12 +1,17 @@
-import subprocess
-import pyautogui
+import pyautogui as pug
 import pandas as pd
 import time
+
 from datetime import datetime
 
-def sign_in(meeting_id, pswd):
-    subprocess.call(['file path'])
+def start():
+    app_pos = pug.locateCenterOnScreen('images/zoomApp.png')
+    print(app_pos)
+    pug.moveTo(app_pos)
 
-meeting_id = input("Please enter the meeting ID: ")
-meeting_pass = input("Please enter the meeting password: ")
-sign_in(meeting_id, meeting_pass)
+def attendance():
+    participants_loc = pug.locateCenterOnScreen('images/participants_btn.png')
+    pug.moveTo(participants_loc)
+    pug.click()
+
+attendance()
