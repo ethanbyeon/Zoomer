@@ -1,32 +1,35 @@
 import pyautogui as pug
-import pandas as pd
-import time
 
 from datetime import datetime
 
-def check_pos(position):
-    if position:
-        pug.moveTo(position)
-        pug.click()
-    else:
-        return False
+class Zoomer():
 
-def new_meeting():
+    def __init__(self):
+        self.name = 'Zoomer'
 
-    meeting_pos = pug.locateCenterOnScreen('images/new_meeting_btn.png')
-    check_pos(meeting_pos)
+    def check_pos(self, position):
+        if position:
+            pug.moveTo(position)
+            pug.click()
+        else:
+            return False
 
-def attendance():
+    def new_meeting(self):
 
-    participants_pos = pug.locateCenterOnScreen('images/participants_btn.png')
-    check_pos(participants_pos)
+        meeting_pos = pug.locateCenterOnScreen('images/menu/new_meeting_btn.png')
+        self.check_pos(meeting_pos)
 
-def breakout():
+    def attendance(self):
 
-    breakout_pos = pug.locateCenterOnScreen('images/breakout_room_btn.png')
-    if check_pos(breakout_pos) == False:
-        more_pos = pug.locateCenterOnScreen('images/more_btn.png')
-        check_pos(more_pos)
-        more_br_option = pug.locateCenterOnScreen('images/more_br_opt.png')
-        check_pos(more_br_option)
+        participants_pos = pug.locateCenterOnScreen('images/meeting/participants_btn.png')
+        self.check_pos(participants_pos)
+
+    def breakout(self):
+
+        breakout_pos = pug.locateCenterOnScreen('images/breakout/breakout_room_btn.png')
+        if self.check_pos(breakout_pos) == False:
+            more_pos = pug.locateCenterOnScreen('images/breakout/more_btn.png')
+            self.check_pos(more_pos)
+            more_br_option = pug.locateCenterOnScreen('images/breakout/more_br_opt.png')
+            self.check_pos(more_br_option)
         
