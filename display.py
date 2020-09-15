@@ -1,5 +1,6 @@
 import tkinter as tk
 import pyautogui as pug
+import cv2
 
 from zoomer import Zoomer
 
