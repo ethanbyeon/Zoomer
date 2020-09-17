@@ -1,15 +1,19 @@
 import os
-import mss
 import time
+import mss
+import cv2
 import pyautogui as pug
+import pytesseract as tess
 import pandas as pd
 
 from PIL import Image
+from pytesseract import Output
 
 images = {
 
-    # USER SCREEN
+    # USER
     'desktop_window' : 'desktop_window.png',
+    'student_list' : 'students.csv',
 
     # BREAKOUT ROOM
     'br_btn' : 'breakout_room_btn.png',
@@ -21,7 +25,6 @@ images = {
     'dot_btn' : 'dot_btn.png',
     'in_the_meeting_label' : 'in_the_meeting_label',
     'participants_btn' : 'participants_btn.png',
-    'participants_label' : 'participants_label.png',
     'remove_btn' : 'remove_btn.png',
     'waiting_list' : 'waiting_list.png',
     'waiting_room_label' : 'waiting_room_label.png',
@@ -66,6 +69,43 @@ class Zoomer():
             print('Image "' + img_name + '" not found.')
             return None
 
+    
+    def get_text_coordinates(self, img_name, img_folder):
+        img = cv2.imread('images/' + img_folder + '/' + img_name)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        names = tess.image_to_data(gray, output_type=Output.DICT)
+        
+        # waiting_names = [line.strip() for line in tess.image_to_string(gray).splitlines() if len(line.strip()) != 0]
+        for i in range(0, len(names["text"])):
+      
+            x = names["left"][i]
+            y = names["top"][i]
+            w = names["width"][i]
+            h = names["height"][i]
+            
+            text = names["text"][i]
+            conf = int(names["conf"][i])
+                
+            print("Confidence: {}".format(conf))
+            print("Text: {}".format(text))
+            print("")
+            
+            text = "".join(text).strip()
+            cv2.rectangle(gray,
+                        (x, y),
+                        (x + w, y + h),
+                        (0, 0, 255), 2)
+            
+        cv2.imshow('Output', gray)
+
+    
+    def validate_students(self, list):
+        df = pd.read_csv('images/user/' + images['student_list'])
+        # print(df[['Groups', 'Leader']])
+        for index, row in df.iterrows():
+            print(index, row)
+        
+
 
     def new_meeting(self):
         new_meeting_btn = self.find_img_coordinates(images['new_meeting_btn'], 'menu')
@@ -83,10 +123,10 @@ class Zoomer():
         waiting_room_label = self.find_img_coordinates(images['waiting_room_label'], 'meeting')
         dot_btn = self.find_img_coordinates(images['dot_btn'], 'meeting')
         
-        x1, y1 = waiting_room_label[0] - 40, waiting_room_label[1]
-        x2, y2 = dot_btn[0], dot_btn[1]
+        x1, y1 = waiting_room_label[0] - 30, waiting_room_label[1] + 10
+        x2, y2 = dot_btn[0], dot_btn[1] - 15
         width = x2 - x1
         height = y2 - y1
         
         self.part_screenshot(x1, y1, width, height, 'meeting')
-        
+        print(self.get_text_coordinates(images['waiting_list'], 'meeting'))
