@@ -13,7 +13,7 @@ images = {
 
     # USER
     'desktop_window' : 'desktop_window.png',
-    'student_list' : 'students.csv',
+    'student_list' : 'attendance.csv',
 
     # BREAKOUT ROOM
     'br_btn' : 'breakout_room_btn.png',
@@ -23,7 +23,7 @@ images = {
     # MEETING
     'admit_btn' : 'admit_btn.png',
     'dot_btn' : 'dot_btn.png',
-    'in_the_meeting_label' : 'in_the_meeting_label',
+    'in_the_meeting_label' : 'in_the_meeting_label.png',
     'participants_btn' : 'participants_btn.png',
     'remove_btn' : 'remove_btn.png',
     'waiting_list' : 'waiting_list.png',
@@ -73,60 +73,79 @@ class Zoomer():
     def get_text_coordinates(self, img_name, img_folder):
         img = cv2.imread('images/' + img_folder + '/' + img_name)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        names = tess.image_to_data(gray, output_type=Output.DICT)
+        d = tess.image_to_data(gray, output_type=Output.DICT)
         
-        # waiting_names = [line.strip() for line in tess.image_to_string(gray).splitlines() if len(line.strip()) != 0]
-        for i in range(0, len(names["text"])):
+        text_coords = []
+        for i in range(0, len(d['text'])):
       
-            x = names["left"][i]
-            y = names["top"][i]
-            w = names["width"][i]
-            h = names["height"][i]
-            
-            text = names["text"][i]
-            conf = int(names["conf"][i])
+            (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+
+            if d['text'][i] != 0 and len(d['text'][i]) != 0:
+                text = d['text'][i]
+                coordinates = {'x': x, 'y': y}
+                text_coords.append({'Text': text, 'Coordinates': coordinates})
                 
-            print("Confidence: {}".format(conf))
-            print("Text: {}".format(text))
-            print("")
+        #         cv2.rectangle(gray,
+        #                 (x, y),
+        #                 (x + w, y + h),
+        #                 (0, 0, 255), 2)
             
-            text = "".join(text).strip()
-            cv2.rectangle(gray,
-                        (x, y),
-                        (x + w, y + h),
-                        (0, 0, 255), 2)
-            
-        cv2.imshow('Output', gray)
+        # cv2.imshow('Output', gray)
+        return text_coords
 
     
-    def validate_students(self, list):
+    def validate_students(self, x, y):
+        
+        waiting_list = self.get_text_coordinates(images['waiting_list'], 'meeting')
+        waiting_list_names = set(student['Text'] for student in waiting_list)
+        
+        attendance_list = {'Present': [], 'Absent': []}
+    
         df = pd.read_csv('images/user/' + images['student_list'])
-        # print(df[['Groups', 'Leader']])
+        all_students = set()
         for index, row in df.iterrows():
-            print(index, row)
+            students = row['Leader'].replace(',',' ').split(',')
+            for student in students:
+                info = student.split(' ')
+                f_name, l_name = info[2], info[0]
+                all_students.add(f_name)
+                all_students.add(l_name)
+
+        present_students = waiting_list_names.intersection(all_students)
+        absent_students = all_students.difference(waiting_list_names)
+        attendance_list['Present'].append(present_students)
+        attendance_list['Absent'].append(absent_students)
+        
+        for student in waiting_list:
+            if student['Text'] in present_students:
+                pug.moveTo(x + student['Coordinates']['x'], y + student['Coordinates']['y'])
+                pug.click(self.find_img_coordinates(images['admit_btn'], 'meeting'))
+
+        return attendance_list
         
 
-
     def new_meeting(self):
-        new_meeting_btn = self.find_img_coordinates(images['new_meeting_btn'], 'menu')
-        pug.click(new_meeting_btn)
+        pug.click(self.find_img_coordinates(images['new_meeting_btn'], 'menu'))
         time.sleep(3.0)
 
-        zoom_meeting_label = self.find_img_coordinates(images['zoom_meeting_label'], 'meeting')
-        pug.moveTo(zoom_meeting_label)
-
-        participants_btn = self.find_img_coordinates(images['participants_btn'], 'meeting')
-        pug.click(participants_btn)
+        pug.moveTo(self.find_img_coordinates(images['zoom_meeting_label'], 'meeting'))
+        pug.click(self.find_img_coordinates(images['participants_btn'], 'meeting'))
 
 
     def attendance(self):
         waiting_room_label = self.find_img_coordinates(images['waiting_room_label'], 'meeting')
+        in_the_meeting_label = self.find_img_coordinates(images['in_the_meeting_label'], 'meeting')
         dot_btn = self.find_img_coordinates(images['dot_btn'], 'meeting')
         
-        x1, y1 = waiting_room_label[0] - 30, waiting_room_label[1] + 10
-        x2, y2 = dot_btn[0], dot_btn[1] - 15
-        width = x2 - x1
-        height = y2 - y1
-        
-        self.part_screenshot(x1, y1, width, height, 'meeting')
-        print(self.get_text_coordinates(images['waiting_list'], 'meeting'))
+        if waiting_room_label is not None:
+            x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
+            x2, y2 = dot_btn[0], in_the_meeting_label[1] - 5
+            width = x2 - x1
+            height = y2 - y1
+            
+            self.part_screenshot(x1, y1, width, height, 'meeting')
+            attendance_list = self.validate_students(x1, y1)
+            print(attendance_list['Present'])
+            print(attendance_list['Absent'])
+        else:
+            print("Attendance checked!")
