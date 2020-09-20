@@ -77,18 +77,22 @@ class Zoomer():
         
         text_coords = []
         for i in range(0, len(d['text'])):
-      
+            
             (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+            
+            if i < len(d['text']) - 1:
+                (x2, y2, w2, h2) = (d['left'][i + 1], d['top'][i + 1], d['width'][i + 1], d['height'][i + 1])
 
-            if d['text'][i] != 0 and len(d['text'][i]) != 0:
-                text = d['text'][i]
-                coordinates = {'x': x, 'y': y}
-                text_coords.append({'Text': text, 'Coordinates': coordinates})
-                
-        #         cv2.rectangle(gray,
-        #                 (x, y),
-        #                 (x + w, y + h),
-        #                 (0, 0, 255), 2)
+                if d['text'][i] != 0 and len(d['text'][i]) != 0:
+                    if d['text'][i + 1] != 0 and len(d['text'][i + 1]) != 0:
+                        text = d['text'][i] + ' ' + d['text'][i + 1]
+                        coordinates = {'x': x, 'y': y}
+                        text_coords.append({'Text': text, 'Coordinates': coordinates})
+                        
+        #                 cv2.rectangle(gray,
+        #                         (x, y),
+        #                         (x + w + w2 + 10, y + h),
+        #                         (0, 0, 255), 2)
             
         # cv2.imshow('Output', gray)
         return text_coords
@@ -98,8 +102,7 @@ class Zoomer():
         
         waiting_list = self.get_text_coordinates(images['waiting_list'], 'meeting')
         waiting_list_names = set(student['Text'] for student in waiting_list)
-        
-        attendance_list = {'Present': [], 'Absent': []}
+        attendance_list = {'Present': [], 'Absent': [], 'Unknown': []}
     
         df = pd.read_csv('images/user/' + images['student_list'])
         all_students = set()
@@ -107,14 +110,16 @@ class Zoomer():
             students = row['Leader'].replace(',',' ').split(',')
             for student in students:
                 info = student.split(' ')
-                f_name, l_name = info[2], info[0]
-                all_students.add(f_name)
-                all_students.add(l_name)
+                name = info[2] + ' '+ info[0]
+                all_students.add(name)
 
         present_students = waiting_list_names.intersection(all_students)
         absent_students = all_students.difference(waiting_list_names)
         attendance_list['Present'].append(present_students)
         attendance_list['Absent'].append(absent_students)
+
+        unknown_students = waiting_list_names.difference(all_students)
+        attendance_list['Unknown'].append(unknown_students)
         
         for student in waiting_list:
             if student['Text'] in present_students:
@@ -145,7 +150,9 @@ class Zoomer():
             
             self.part_screenshot(x1, y1, width, height, 'meeting')
             attendance_list = self.validate_students(x1, y1)
-            print(attendance_list['Present'])
-            print(attendance_list['Absent'])
+            print('Present Students: ' + str(attendance_list['Present']))
+            print('Absent Students: ' + str(attendance_list['Absent']))
+            print('Unknown Students: ' + str(attendance_list['Unknown']))
+            print('Attendance checked!')
         else:
             print("Attendance checked!")
