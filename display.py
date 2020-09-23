@@ -23,10 +23,12 @@ class Display(tk.Frame):
     def create_widgets(self):
 
         new_meeting_btn = tk.Button(self, text="New Meeting", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=BOT.new_meeting)
-        attendance_btn = tk.Button(self, text="Attendance", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=BOT.attendance)
+        student_btn = tk.Button(self, text="Student Attendance", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=BOT.student_attendance)
+        leaders_btn = tk.Button(self, text="Group Leaders", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=BOT.leader_attendance)
 
-        new_meeting_btn.grid(row=0, column=0, padx=125, pady=10)
-        attendance_btn.grid(row=1, column=0)
+        new_meeting_btn.grid(row=0, column=0, padx=125)
+        student_btn.grid(row=1, column=0, pady=10)
+        leaders_btn.grid(row=2, column=0)
 
 
 Display()

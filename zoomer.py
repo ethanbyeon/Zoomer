@@ -13,7 +13,7 @@ images = {
 
     # USER
     'desktop_window' : 'desktop_window.png',
-    'student_list' : 'attendance.csv',
+    'attendance_sheet' : 'attendance.csv',
 
     # BREAKOUT ROOM
     'br_btn' : 'breakout_room_btn.png',
@@ -96,38 +96,7 @@ class Zoomer():
             
         # cv2.imshow('Output', gray)
         return text_coords
-
     
-    def validate_students(self, x, y):
-        
-        waiting_list = self.get_text_coordinates(images['waiting_list'], 'meeting')
-        waiting_list_names = set(student['Text'] for student in waiting_list)
-        attendance_list = {'Present': [], 'Absent': [], 'Unknown': []}
-    
-        df = pd.read_csv('images/user/' + images['student_list'])
-        all_students = set()
-        for index, row in df.iterrows():
-            students = row['Leader'].replace(',',' ').split(',')
-            for student in students:
-                info = student.split(' ')
-                name = info[2] + ' '+ info[0]
-                all_students.add(name)
-
-        present_students = waiting_list_names.intersection(all_students)
-        absent_students = all_students.difference(waiting_list_names)
-        attendance_list['Present'].append(present_students)
-        attendance_list['Absent'].append(absent_students)
-
-        unknown_students = waiting_list_names.difference(all_students)
-        attendance_list['Unknown'].append(unknown_students)
-        
-        for student in waiting_list:
-            if student['Text'] in present_students:
-                pug.moveTo(x + student['Coordinates']['x'], y + student['Coordinates']['y'])
-                pug.click(self.find_img_coordinates(images['admit_btn'], 'meeting'))
-
-        return attendance_list
-        
 
     def new_meeting(self):
         pug.click(self.find_img_coordinates(images['new_meeting_btn'], 'menu'))
@@ -137,7 +106,7 @@ class Zoomer():
         pug.click(self.find_img_coordinates(images['participants_btn'], 'meeting'))
 
 
-    def attendance(self):
+    def attendance(self, student_type):
         waiting_room_label = self.find_img_coordinates(images['waiting_room_label'], 'meeting')
         in_the_meeting_label = self.find_img_coordinates(images['in_the_meeting_label'], 'meeting')
         dot_btn = self.find_img_coordinates(images['dot_btn'], 'meeting')
@@ -149,10 +118,53 @@ class Zoomer():
             height = y2 - y1
             
             self.part_screenshot(x1, y1, width, height, 'meeting')
-            attendance_list = self.validate_students(x1, y1)
-            print('Present Students: ' + str(attendance_list['Present']))
-            print('Absent Students: ' + str(attendance_list['Absent']))
-            print('Unknown Students: ' + str(attendance_list['Unknown']))
-            print('Attendance checked!')
+            attendance_list = self.validate_students(x1, y1, student_type)
+            self.roll_call(attendance_list)
         else:
             print("Attendance checked!")
+
+    
+    def validate_students(self, x, y, student_type):
+        
+        waiting_list = self.get_text_coordinates(images['waiting_list'], 'meeting')
+        waiting_list_names = set(student['Text'] for student in waiting_list)
+        attendance_list = {'Present': [], 'Absent': [], 'Unknown': []}
+    
+        student_data = pd.read_csv('images/user/' + images['attendance_sheet'])
+        all_students = set()
+        
+        if student_type == 'Leader':
+            for column in student_data[student_type]:
+                info = column.replace(',', '').split(' ')
+                name = info[1] + ' ' + info[0]
+                all_students.add(name)
+
+        present_students = waiting_list_names.intersection(all_students)
+        absent_students = all_students.difference(waiting_list_names)
+        unknown_students = waiting_list_names.difference(all_students)
+
+        attendance_list['Present'].append(present_students)
+        attendance_list['Absent'].append(absent_students)
+        attendance_list['Unknown'].append(unknown_students)
+        
+        for student in waiting_list:
+            if student['Text'] in present_students:
+                pug.moveTo(x + student['Coordinates']['x'], y + student['Coordinates']['y'])
+                pug.click(self.find_img_coordinates(images['admit_btn'], 'meeting'))
+
+        return attendance_list
+
+
+    def roll_call(self, attendance_list):
+        print('Present Students: ' + str(attendance_list['Present']))
+        print('Absent Students: ' + str(attendance_list['Absent']))
+        print('Unknown Students: ' + str(attendance_list['Unknown']))
+        print('Attendance checked!')
+
+
+    def student_attendance(self):
+        self.attendance('Student')
+    
+    
+    def leader_attendance(self):
+        self.attendance('Leader')
