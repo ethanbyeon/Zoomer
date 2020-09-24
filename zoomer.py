@@ -22,12 +22,18 @@ class Zoomer:
     def attendance(self, file_name, student_type):
 
         waiting_room_label = capture.find_img_coordinates('waiting_room_label.png', 'meeting')
-        in_the_meeting_label = capture.find_img_coordinates('in_the_meeting_label.png', 'meeting')
         dot_btn = capture.find_img_coordinates('dot_btn.png', 'meeting')
         
-        if waiting_room_label is not None:
+        in_the_meeting_label = capture.find_img_coordinates('in_the_meeting_label.png', 'meeting')
+        if in_the_meeting_label is not None:
+            time.sleep(3.0)
+            pug.click(in_the_meeting_label[0] + 85, in_the_meeting_label[1])
+            pug.moveTo(in_the_meeting_label[0], in_the_meeting_label[1] + 20)
+        
+        nonverbal_btns = capture.find_img_coordinates('nonverbal_btns.png', 'meeting')
+        if nonverbal_btns is not None:
             x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
-            x2, y2 = dot_btn[0], in_the_meeting_label[1] - 5
+            x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
             width = x2 - x1
             height = y2 - y1
             
@@ -35,7 +41,17 @@ class Zoomer:
             attendance_list = self.validate_students(x1, y1, file_name, student_type)
             self.roll_call(attendance_list)
         else:
-            print("Attendance checked!")
+            if waiting_room_label is not None:
+                x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
+                x2, y2 = dot_btn[0], dot_btn[1] - 10
+                width = x2 - x1
+                height = y2 - y1
+                
+                capture.part_screenshot(x1, y1, width, height, 'meeting')
+                attendance_list = self.validate_students(x1, y1, file_name, student_type)
+                self.roll_call(attendance_list)
+            else:
+                print("Attendance checked!")
 
     
     def validate_students(self, x, y, file_name, student_type):
@@ -48,16 +64,22 @@ class Zoomer:
         all_students = set()
         
         if student_type == 'Leader':
+
             for c in student_data[student_type]:
                 info = c.replace(',', '').split(' ')
                 name = info[1] + ' ' + info[0]
                 all_students.add(name)
+                
         elif student_type == 'Student':
-            for r in student_data.drop(['Group', 'Leader'], axis=1):
-                print(r)
-            
-            # for r in student_data.iloc[:,2:]:
-            #     print(r)
+                        
+            for r in range(0, len(student_data.iloc[:, 2:])):
+                for c in student_data.iloc[r, 2:]:
+                    if type(c) is float:
+                        continue
+                    else:
+                        info = c.replace(',', '').split(' ')
+                        name = info[1] + ' ' + info[0]
+                        all_students.add(name)
                 
         present_students = waiting_list_names.intersection(all_students)
         absent_students = all_students.difference(waiting_list_names)
@@ -67,10 +89,10 @@ class Zoomer:
         attendance_list['Absent'].append(absent_students)
         attendance_list['Unknown'].append(unknown_students)
         
-        for student in waiting_list:
-            if student['Text'] in present_students:
-                pug.moveTo(x + student['Coordinates']['x'], y + student['Coordinates']['y'])
-                pug.click(capture.find_img_coordinates('admit_btn.png', 'meeting'))
+        # for student in waiting_list:
+        #     if student['Text'] in present_students:
+        #         pug.moveTo(x + student['Coordinates']['x'], y + student['Coordinates']['y'])
+        #         pug.click(capture.find_img_coordinates('admit_btn.png', 'meeting'))
 
         return attendance_list
 

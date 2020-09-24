@@ -3,9 +3,11 @@ import os
 import mss
 import pyautogui as pug
 import pytesseract as tess
+import re
 
 from PIL import Image
 from pytesseract import Output
+
 
 def full_screenshot():
 
@@ -48,18 +50,28 @@ def get_text_coordinates(img_name, img_folder):
     for i in range(0, len(d['text'])):
         
         (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-        
+
         if i < len(d['text']) - 1:
+            (x2, y2, w2, h2) = (d['left'][i + 1], d['top'][i + 1], d['width'][i + 1], d['height'][i + 1])
+
             if d['text'][i] != 0 and len(d['text'][i]) != 0:
                 if d['text'][i + 1] != 0 and len(d['text'][i + 1]) != 0:
                     text = d['text'][i] + ' ' + d['text'][i + 1]
-                    coordinates = {'x': x, 'y': y}
-                    text_coords.append({'Text': text, 'Coordinates': coordinates})
                     
-    #                 cv2.rectangle(gray,
-    #                         (x, y),
-    #                         (x + w + w2 + 10, y + h),
-    #                         (0, 0, 255), 2)
+                    if re.match(r'Meeting ([0-5])', text) or re.match(r'[0-50] the', text) or re.match(r'([1-50]) >', text):
+                        cv2.rectangle(gray,
+                            (x - 10, y),
+                            (x + w + w2 + 50, y + h + 5),
+                            (255, 255, 255), -1)
+                    else:
+                        coordinates = {'x': x, 'y': y}
+                        text_coords.append({'Text': text, 'Coordinates': coordinates})
+                    
+                    # DEBUG DETECTION
+                    cv2.rectangle(gray,
+                            (x, y),
+                            (x + w + w2 + 10, y + h),
+                            (0, 0, 255), 2)
         
-    # cv2.imshow('Output', gray)
+    cv2.imshow('Output', gray)
     return text_coords

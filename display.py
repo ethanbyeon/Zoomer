@@ -1,12 +1,14 @@
 import tkinter as tk
 
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from zoomer import Zoomer
+
 
 BUTTON_HEIGHT = 2
 BUTTON_WIDTH = 20
 
 BOT = Zoomer()
+
 
 class Display(tk.Frame):
 
@@ -20,6 +22,7 @@ class Display(tk.Frame):
 
         self.create_widgets()
         self.mainloop()
+        
 
     def create_widgets(self):
 
@@ -31,9 +34,11 @@ class Display(tk.Frame):
         student_btn.grid(row=1, column=0, pady=10)
         leaders_btn.grid(row=2, column=0)
 
+
     def student_file_input(self):
         file_name = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'), ('xlsx files', '*.xlsx')))
         BOT.attendance(file_name, 'Student')
+    
     
     def leader_file_input(self):
         file_name = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'), ('xlsx files', '*.xlsx')))
