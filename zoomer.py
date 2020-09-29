@@ -1,8 +1,8 @@
 import capture
-import time
 import pandas as pd
 import pyautogui as pug
-
+import time
+from tkinter import filedialog
 
 class Zoomer:
 
@@ -10,23 +10,14 @@ class Zoomer:
         self.name = 'Zoomer'
     
 
-    def new_meeting(self):
-
-        pug.click(capture.find_img_coordinates('new_meeting_btn.png', 'menu'))
-        time.sleep(3.0)
-
-        pug.moveTo(capture.find_img_coordinates('zoom_meeting_label.png', 'meeting'))
-        pug.click(capture.find_img_coordinates('participants_btn.png', 'meeting'))
-
-
-    def attendance(self, file_name, student_type):
+    def attendance(self, file_name, file2_name, student_type):
 
         waiting_room_label = capture.find_img_coordinates('waiting_room_label.png', 'meeting')
         dot_btn = capture.find_img_coordinates('dot_btn.png', 'meeting')
         
         in_the_meeting_label = capture.find_img_coordinates('in_the_meeting_label.png', 'meeting')
         if in_the_meeting_label is not None:
-            time.sleep(3.0)
+            time.sleep(1.0)
             pug.click(in_the_meeting_label[0] + 85, in_the_meeting_label[1])
             pug.moveTo(in_the_meeting_label[0], in_the_meeting_label[1] + 20)
         
@@ -36,54 +27,63 @@ class Zoomer:
             x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
             width = x2 - x1
             height = y2 - y1
-            
-            capture.part_screenshot(x1, y1, width, height, 'meeting')
-            attendance_list = self.validate_students(x1, y1, file_name, student_type)
-            self.roll_call(attendance_list)
         else:
             if waiting_room_label is not None:
                 x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
                 x2, y2 = dot_btn[0], dot_btn[1] - 10
                 width = x2 - x1
                 height = y2 - y1
-                
-                capture.part_screenshot(x1, y1, width, height, 'meeting')
-                attendance_list = self.validate_students(x1, y1, file_name, student_type)
-                self.roll_call(attendance_list)
             else:
                 print("Attendance checked!")
+        
+        capture.part_screenshot(x1, y1, width, height, 'meeting')
+        attendance_list = self.validate_students(x1, y1, file_name, file2_name, student_type)
+        self.roll_call(attendance_list)
 
-    
-    def validate_students(self, x, y, file_name, student_type):
+    # CHECKS IF THE STUDENT'S NAME IN WAITING ROOM IS WRITTEN IN THE STUDENT ROSTER
+    def validate_students(self, x, y, file_name, file2_name, student_type):
         
         waiting_list = capture.get_text_coordinates('waiting_list.png', 'meeting')
         waiting_list_names = set(student['Text'] for student in waiting_list)
+
+        student_pool = set()
         attendance_list = {'Present': [], 'Absent': [], 'Unknown': []}
 
-        student_data = pd.read_csv(file_name)
-        all_students = set()
+        # USER STUDENT ROSTER
+        student_df = pd.read_csv(file_name)
+
+        # OUTPUT ATTENDANCE LIST
+        students = {'Student ID': [], 'First Name': [], 'Last Name': [], 'Status': []}
         
         if student_type == 'Leader':
-
-            for c in student_data[student_type]:
+        
+            for c in student_df[student_type]:
                 info = c.replace(',', '').split(' ')
                 name = info[1] + ' ' + info[0]
-                all_students.add(name)
-                
+                student_pool.add(name)
+
+                students['Student ID'].append(info[2])
+                students['First Name'].append(info[1])
+                students['Last Name'].append(info[0])
+                students['Status'].append('')
+            
+            output_df = pd.DataFrame(students)
+            output_file = output_df.to_csv(file2_name, index=False)
+
         elif student_type == 'Student':
                         
-            for r in range(0, len(student_data.iloc[:, 2:])):
-                for c in student_data.iloc[r, 2:]:
+            for r in range(0, len(student_df.iloc[:, 2:])):
+                for c in student_df.iloc[r, 2:]:
                     if type(c) is float:
                         continue
                     else:
                         info = c.replace(',', '').split(' ')
                         name = info[1] + ' ' + info[0]
-                        all_students.add(name)
+                        student_pool.add(name)
                 
-        present_students = waiting_list_names.intersection(all_students)
-        absent_students = all_students.difference(waiting_list_names)
-        unknown_students = waiting_list_names.difference(all_students)
+        present_students = waiting_list_names.intersection(student_pool)
+        absent_students = student_pool.difference(waiting_list_names)
+        unknown_students = waiting_list_names.difference(student_pool)
 
         attendance_list['Present'].append(present_students)
         attendance_list['Absent'].append(absent_students)

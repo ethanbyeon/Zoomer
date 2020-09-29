@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from tkinter import filedialog, messagebox
+from tkinter import filedialog
 from zoomer import Zoomer
 
 
@@ -8,7 +8,6 @@ BUTTON_HEIGHT = 2
 BUTTON_WIDTH = 20
 
 BOT = Zoomer()
-
 
 class Display(tk.Frame):
 
@@ -26,23 +25,23 @@ class Display(tk.Frame):
 
     def create_widgets(self):
 
-        new_meeting_btn = tk.Button(self, text="New Meeting", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=BOT.new_meeting)
         student_btn = tk.Button(self, text="Student Attendance", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=self.student_file_input)
         leaders_btn = tk.Button(self, text="Group Leaders", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=self.leader_file_input)
 
-        new_meeting_btn.grid(row=0, column=0, padx=125)
-        student_btn.grid(row=1, column=0, pady=10)
+        student_btn.grid(row=1, column=0, padx=125, pady=10)
         leaders_btn.grid(row=2, column=0)
 
 
     def student_file_input(self):
-        file_name = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'), ('xlsx files', '*.xlsx')))
-        BOT.attendance(file_name, 'Student')
+        student_roster = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'),))
+        attendance_list = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'),))
+        BOT.attendance(student_roster, attendance_list, 'Student')
     
     
     def leader_file_input(self):
-        file_name = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'), ('xlsx files', '*.xlsx')))
-        BOT.attendance(file_name, 'Leader')
+        student_roster = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'),))
+        attendance_list = filedialog.askopenfilename(title='Select A File', filetypes=(('csv files', '*.csv'),))
+        BOT.attendance(student_roster, attendance_list, 'Leader')
         
 
 Display()
