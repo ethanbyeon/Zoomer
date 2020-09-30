@@ -46,7 +46,7 @@ class Display(tk.Frame):
             FILES[file] = file_name
 
         if FILES['Input'] != '' and FILES['Output'] != '':
-            BOT.setup_df(FILES["Input"], FILES["Output"])
+            BOT.setup_df(FILES['Input'], FILES['Output'])
 
 
     def attendance(self, student_type):
@@ -56,7 +56,7 @@ class Display(tk.Frame):
             if FILES['Output'] == '':
                 print("Please select an output file for the attendance results.")
         else:
-            BOT.attendance(FILES["Output"], student_type)
+            BOT.attendance(FILES['Input'], FILES['Output'], student_type)
         
 
 Display()

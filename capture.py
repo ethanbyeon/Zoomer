@@ -74,5 +74,5 @@ def get_text_coordinates(img_name, img_folder):
                             (x + w + w2 + 10, y + h),
                             (0, 0, 255), 2)
         
-    # cv2.imshow('Output', gray)
+    cv2.imshow('Output', gray)
     return text_coords
