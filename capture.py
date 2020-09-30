@@ -58,11 +58,12 @@ def get_text_coordinates(img_name, img_folder):
                 if d['text'][i + 1] != 0 and len(d['text'][i + 1]) != 0:
                     text = d['text'][i] + ' ' + d['text'][i + 1]
                     
-                    if re.match(r'Meeting ([0-5])', text) or re.match(r'[0-50] the', text) or re.match(r'([1-50]) >', text):
+                    if re.match(r'Meeting \([0-5]\)', text) or re.match(r'[0-50] the', text) or re.match(r'\([1-50]\) >', text) or text == 'the Meeting':
                         cv2.rectangle(gray,
                             (x - 10, y),
-                            (x + w + w2 + 50, y + h + 5),
+                            (x + w + w2 + 100, y + h + 5),
                             (255, 255, 255), -1)
+                        continue
                     else:
                         coordinates = {'x': x, 'y': y}
                         text_coords.append({'Text': text, 'Coordinates': coordinates})
@@ -73,5 +74,5 @@ def get_text_coordinates(img_name, img_folder):
                             (x + w + w2 + 10, y + h),
                             (0, 0, 255), 2)
         
-    cv2.imshow('Output', gray)
+    # cv2.imshow('Output', gray)
     return text_coords
