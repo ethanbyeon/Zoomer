@@ -12,24 +12,24 @@ from pytesseract import Output
 def full_screenshot():
 
     with mss.mss() as sct:
-        sct.shot(output='images/user/desktop_window.png')
+        sct.shot(output="images/user/desktop_window.png")
 
 
 def part_screenshot(xpos, ypos, width, height, img_folder):
 
     with mss.mss() as sct:
-        area = {"top": int(ypos), 'left': int(xpos), 'width': int(width), 'height': int(height)}
+        area = {'top': int(ypos), 'left': int(xpos), 'width': int(width), 'height': int(height)}
         
         area_img = sct.grab(area)
-        mss.tools.to_png(area_img.rgb, area_img.size, output='images/' + img_folder + '/waiting_list.png')
+        mss.tools.to_png(area_img.rgb, area_img.size, output="images/" + img_folder + "/waiting_list.png")
 
 
 def find_img_coordinates(img_name, img_folder):
 
     full_screenshot()
 
-    needle = os.path.abspath('images/' + img_folder + '/' + img_name)
-    haystack = os.path.abspath('images/user/desktop_window.png')
+    needle = os.path.abspath("images/" + img_folder + '/' + img_name)
+    haystack = os.path.abspath("images/user/desktop_window.png")
     
     img_coordinates = pug.locate(needle, haystack, grayscale=False)
     if img_coordinates is not None:
@@ -42,7 +42,7 @@ def find_img_coordinates(img_name, img_folder):
 
 def get_text_coordinates(img_name, img_folder):
 
-    img = cv2.imread('images/' + img_folder + '/' + img_name)
+    img = cv2.imread("images/" + img_folder + '/' + img_name)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     d = tess.image_to_data(gray, output_type=Output.DICT)
     
@@ -58,7 +58,7 @@ def get_text_coordinates(img_name, img_folder):
                 if d['text'][i + 1] != 0 and len(d['text'][i + 1]) != 0:
                     text = d['text'][i] + ' ' + d['text'][i + 1]
                     
-                    if re.match(r'Meeting \([0-5]\)', text) or re.match(r'[0-50] the', text) or re.match(r'\([1-50]\) >', text) or text == 'the Meeting':
+                    if re.match(r'Meeting \([0-5]\)', text) or re.match(r'[0-50] the', text) or re.match(r'\([1-50]\) >', text) or text == "the Meeting":
                         cv2.rectangle(gray,
                             (x - 10, y),
                             (x + w + w2 + 100, y + h + 5),
