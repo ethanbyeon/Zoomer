@@ -104,7 +104,8 @@ class Zoomer:
         if search_bar is not None:
             for name in leaders:
                 pug.click(search_bar)
-                pug.typewrite(name)
+                pug.typewrite(name, 0.1)
+                print(name)
 
                 wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
                 wait_names = set(student['Text'] for student in wait_list)
@@ -112,7 +113,7 @@ class Zoomer:
                 present_leaders = wait_names.intersection(leaders)
                 absent_leaders = leaders.difference(wait_names)
                 
-                self.write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file, "Search")
+                self.write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file, admit_type="Search")
         else:
             wait_list = capture.get_text_coordinates('waiting_list.png', "meeting")
             wait_names = set(student['Text'] for student in wait_list)
@@ -120,13 +121,12 @@ class Zoomer:
             present_leaders = wait_names.intersection(leaders)
             absent_leaders = leaders.difference(wait_names)
             
-            self.write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file , "NA")
+            self.write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file , admit_type="NA")
 
     
     def write_to_csv(self, x, y, present, absent, wait_list, output_file, admit_type):
-
         output_df = pd.read_csv(output_file)
-        output_df.fillna('NA', inplace=True)
+        output_df.fillna("NA", inplace=True)
 
         for r in range(0, len(output_df.iloc[:, 1:2])):
             for c in output_df.iloc[r, 1:2]:
@@ -146,9 +146,12 @@ class Zoomer:
 
     def admit_student(self, x, y, student, wait_list, admit_type):
         match = next(person for person in wait_list if person['Text'] == student)
-        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+        print(match)
+        if match is not None:
+            pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+            pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
         
-        pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
-
         if admit_type == "Search":
+            print("YES")
+            capture.find_img_coordinates("participants_search.png", "meeting")
             pug.click(capture.find_img_coordinates("close_searchbar.png", "meeting"))
