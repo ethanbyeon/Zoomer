@@ -30,12 +30,12 @@ def setup_df(input_file, output_file):
 
 
 def attendance(input_file, output_file, student_type):
-
-    waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
-    nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
-    dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
     
     if student_type == "Student":
+
+        waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
+        nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
+        dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
         if waiting_room_label is not None:
             x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
@@ -77,7 +77,7 @@ def validate_students(x, y, output_file):
     absent_students = df_pool.difference(wait_names)
     unknown_students = wait_names.difference(df_pool)
 
-    write_to_csv(x, y, present_students, absent_students, wait_list, output_file, "NA")
+    write_to_csv(x, y, present_students, absent_students, wait_list, output_file)
 
     attendance_list['Present'].append(present_students)
     attendance_list['Absent'].append(absent_students)
@@ -122,13 +122,17 @@ def validate_leaders(input_file, output_file):
             present_leaders = wait_names.intersection(leaders)
             absent_leaders = leaders.difference(wait_names)
             
-            write_to_csv(x1, y1, present_leaders, absent_leaders, wait_list, output_file, admit_type="Search")
+            write_to_csv(x1, y1, present_leaders, absent_leaders, wait_list, output_file)
+            
+            close_btn = capture.find_img_coordinates("close_searchbar.png", "meeting")
+            pug.click(close_btn[0] - 20, close_btn[1])
+            pug.click(close_btn)
     else:
         print("Cannot locate the search bar.")
         return None
 
 
-def write_to_csv(x, y, present, absent, wait_list, output_file, admit_type):
+def write_to_csv(x, y, present, absent, wait_list, output_file):
     output_df = pd.read_csv(output_file)
     output_df.fillna("NA", inplace=True)
 
@@ -139,7 +143,7 @@ def write_to_csv(x, y, present, absent, wait_list, output_file, admit_type):
             if c in present or c in absent:
                 if c in present:
                     output_df.iat[r, 2] = "PRESENT"
-                    admit_student(x, y, c, wait_list, admit_type)
+                    admit_student(x, y, c, wait_list)
                 if c in absent:
                     output_df.iat[r, 2] = "ABSENT"
 
@@ -148,13 +152,9 @@ def write_to_csv(x, y, present, absent, wait_list, output_file, admit_type):
     output_df.to_csv(output_file, index=False)
 
 
-def admit_student(x, y, student, wait_list, admit_type):
+def admit_student(x, y, student, wait_list):
     match = next(person for person in wait_list if person['Text'] == student)
     
     if match is not None:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
-    
-    if admit_type == "Search":
-        capture.find_img_coordinates("participants_search.png", "meeting")
-        pug.click(capture.find_img_coordinates("close_searchbar.png", "meeting"))
