@@ -126,7 +126,6 @@ def validate_leaders(input_file, output_file):
             
             close_btn = capture.find_img_coordinates("close_searchbar.png", "meeting")
             pug.click(close_btn[0] - 20, close_btn[1])
-            pug.click(close_btn)
     else:
         print("Cannot locate the search bar.")
         return None
@@ -154,7 +153,8 @@ def write_to_csv(x, y, present, absent, wait_list, output_file):
 
 def admit_student(x, y, student, wait_list):
     match = next(person for person in wait_list if person['Text'] == student)
-    
+    print("Wait List:" + match)
     if match is not None:
+        print("MATCH FOUND!")
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
