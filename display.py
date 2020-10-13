@@ -18,7 +18,7 @@ class Display(tk.Frame):
         self.grid()
         self.master.title("Zoomer")
         self.master.resizable(width=False, height=False)
-        self.master.geometry('330x400')
+        self.master.geometry('330x300')
 
         self.create_widgets()
         self.mainloop()
@@ -26,22 +26,28 @@ class Display(tk.Frame):
 
     def create_widgets(self):
 
-        input_label = tk.Label(self, text="Student Roster: Empty")
-        output_label = tk.Label(self, text="Attendance Results: Empty")
+        f_in_btn = tk.Button(self, text="Student Roster", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=lambda: self.addFile("Input", f_in_label))
+        f_out_btn = tk.Button(self, text="Attendance Results", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=lambda: self.addFile("Output", f_out_label))
 
-        file_in_btn = tk.Button(self, text="Student Roster", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=lambda: self.addFile("Input", input_label))
-        file_out_btn = tk.Button(self, text="Attendance Results", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=lambda: self.addFile("Output", output_label))
-
-        student_btn = tk.Button(self, text="Take Attendance", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=lambda: self.attendance("Student", input_label, output_label))
-        leaders_btn = tk.Button(self, text="Admit Group Leaders", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", command=lambda: self.attendance("Leader", input_label, output_label))
+        student_btn = tk.Button(self, text="Take Attendance", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", 
+            command=lambda: self.attendance("Student", f_in_label, f_out_label, output_label))
+        leaders_btn = tk.Button(self, text="Admit Group Leaders", height=BUTTON_HEIGHT, width=BUTTON_WIDTH, fg="black", 
+            command=lambda: self.attendance("Leader", f_in_label, f_out_label, output_label))
         
-        input_label.grid(row=3, column=0, columnspan=2)
-        output_label.grid(row=4, column=0, pady=5, columnspan=2)
+        f_in_label = tk.Label(self, text="Student Roster: Empty")
+        f_out_label = tk.Label(self, text="Attendance Results: Empty")
 
-        file_in_btn.grid(row=1, column=0, padx=10, pady=5)
-        file_out_btn.grid(row=1, column=1, pady=5)
+        output_label = tk.Label(self, text="")
+
+        f_in_btn.grid(row=1, column=0, padx=10, pady=15)
+        f_out_btn.grid(row=1, column=1, pady=5)
         student_btn.grid(row=2, column=0, pady=5)
         leaders_btn.grid(row=2, column=1, pady=5)
+
+        f_in_label.grid(row=3, column=0, pady=20, columnspan=2)
+        f_out_label.grid(row=4, column=0, columnspan=2)
+
+        output_label.grid(row=5, column=0, pady=10, columnspan=2)
 
     
     def addFile(self, file, label):
@@ -59,13 +65,16 @@ class Display(tk.Frame):
             zoomer.setup_df(FILES['Input'], FILES['Output'])
 
 
-    def attendance(self, student_type, input_label, output_label):
+    def attendance(self, student_type, f_in_label, f_out_label, output_label):
         if FILES['Input'] == '' or FILES['Output'] == '':
             if FILES['Input'] == '':
-                input_label.config(text="Student Roster: Please select an input file.")
+                f_in_label.config(text="Student Roster: Please select an input file.")
             if FILES['Output'] == '':
-                output_label.config(text="Attendance Results: Please select an output file.")
+                f_out_label.config(text="Attendance Results: Please select an output file.")
         else:
-            zoomer.attendance(FILES['Input'], FILES['Output'], student_type)
+            output_label.config(text="")
+            run = zoomer.attendance(FILES['Input'], FILES['Output'], student_type)
+            if run is None:
+                output_label.config(text="Please make sure to: \nminimize all unused windows \nkeep the Zoom app visible on the desktop.")
             
 Display()

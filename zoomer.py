@@ -34,27 +34,47 @@ def attendance(input_file, output_file, student_type):
     if student_type == "Student":
 
         waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
-        nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
         dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
-        if waiting_room_label is not None:
+        if waiting_room_label is not None and dot_btn is not None:
             x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
             x2, y2 = dot_btn[0], dot_btn[1] - 10
             width = x2 - x1
             height = y2 - y1
             
+            nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
             if nonverbal_btns is not None:
                 x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
                 width = x2 - x1
                 height = y2 - y1
 
-        capture.part_screenshot(x1, y1, width, height, "meeting")
-        validate_students(x1, y1, output_file)
+            capture.part_screenshot(x1, y1, width, height, "meeting")
+            validate_students(x1, y1, output_file)
+
+        else:
+            return None
 
     elif student_type == "Leader":
-        validate_leaders(input_file, output_file)
-    else:
-        return
+
+        dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+        search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
+        
+        if search_bar is not None and dot_btn is not None:
+            x1, y1 = search_bar[0] - 135, search_bar[1] + 10
+            x2, y2 = dot_btn[0], dot_btn[1] - 10
+            width = x2 - x1
+            height = y2 - y1
+
+            nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
+            if nonverbal_btns is not None:
+                x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
+                width = x2 - x1
+                height = y2 - y1
+        
+        else:
+            return None
+        
+        validate_leaders(x1, y1, width, height, search_bar, input_file, output_file)
 
 
 # CHECKS IF THE STUDENT'S NAME IN WAITING ROOM IS WRITTEN IN THE STUDENT ROSTER
@@ -86,11 +106,7 @@ def validate_students(x, y, output_file):
     return attendance_list
 
 
-def validate_leaders(input_file, output_file): 
-
-    search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
-    nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
-    dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+def validate_leaders(x, y, width, height, search_bar, input_file, output_file): 
 
     leaders = set()
 
@@ -99,36 +115,24 @@ def validate_leaders(input_file, output_file):
         info = r.replace(',', '').split(' ')
         name = info[1] + ' ' + info[0]
         leaders.add(name)
-    
-    if search_bar is not None:
-        x1, y1 = search_bar[0] - 135, search_bar[1] + 10
-        x2, y2 = dot_btn[0], dot_btn[1] - 10
-        width = x2 - x1
-        height = y2 - y1
 
-        if nonverbal_btns is not None:
-            x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
-            width = x2 - x1
-            height = y2 - y1
+    for name in leaders:
+        pug.click(search_bar)
+        pug.typewrite(name, 0.1)
 
-        for name in leaders:
-            pug.click(search_bar)
-            pug.typewrite(name, 0.1)
+        capture.part_screenshot(x, y, width, height, "meeting")
+        wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
+        wait_names = set(student['Text'] for student in wait_list)   
 
-            capture.part_screenshot(x1, y1, width, height, "meeting")
-            wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-            wait_names = set(student['Text'] for student in wait_list)   
+        present_leaders = wait_names.intersection(leaders)
+        absent_leaders = leaders.difference(wait_names)
+        
+        write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file)
+        
+        close_btn = capture.find_img_coordinates("close_searchbar.png", "meeting")
+        pug.click(close_btn[0] - 20, close_btn[1])
 
-            present_leaders = wait_names.intersection(leaders)
-            absent_leaders = leaders.difference(wait_names)
-            
-            write_to_csv(x1, y1, present_leaders, absent_leaders, wait_list, output_file)
-            
-            close_btn = capture.find_img_coordinates("close_searchbar.png", "meeting")
-            pug.click(close_btn[0] - 20, close_btn[1])
-    else:
-        print("Cannot locate the search bar.")
-        return None
+    return leaders
 
 
 def write_to_csv(x, y, present, absent, wait_list, output_file):
@@ -153,8 +157,7 @@ def write_to_csv(x, y, present, absent, wait_list, output_file):
 
 def admit_student(x, y, student, wait_list):
     match = next(person for person in wait_list if person['Text'] == student)
-    print("Wait List:" + match)
+    
     if match is not None:
-        print("MATCH FOUND!")
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
