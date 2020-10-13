@@ -130,7 +130,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file)
         
         close_btn = capture.find_img_coordinates("close_searchbar.png", "meeting")
-        pug.click(close_btn[0] - 20, close_btn[1])
+        pug.click(close_btn[0] - 10, close_btn[1])
 
     return leaders
 
