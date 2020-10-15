@@ -68,12 +68,7 @@ class Display(tk.Frame):
 
 
     def attendance(self, student_type, f_in_label, f_out_label, output_label):
-        if FILES['Input'] == '' or FILES['Output'] == '':
-            if FILES['Input'] == '':
-                output_label.config(text="Please select an input file.")
-            if FILES['Output'] == '':
-                output_label.config(text="Please select an output file.")
-        else:
+        if FILES['Input'] != '' and FILES['Output'] != '':
             output_label.config(text="")
             run = zoomer.attendance(FILES['Input'], FILES['Output'], student_type)
             if run is None:

@@ -60,7 +60,7 @@ def attendance(input_file, output_file, student_type):
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
         
         if search_bar is not None and dot_btn is not None:
-            x1, y1 = search_bar[0] - 135, search_bar[1] + 10
+            x1, y1 = search_bar[0] - 140, search_bar[1] + 30
             x2, y2 = dot_btn[0], dot_btn[1] - 10
             width = x2 - x1
             height = y2 - y1
@@ -129,8 +129,13 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         
         write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file)
         
-        close_btn = capture.find_img_coordinates("close_searchbar.png", "meeting")
-        pug.click(close_btn[0] - 10, close_btn[1])
+        blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
+        close_btn = capture.find_img_coordinates("close_search.png", "meeting")
+
+        if blue_close_btn is not None:
+            pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
+        elif close_btn is not None:
+            pug.click(close_btn[0] - 10, close_btn[1])
 
     return leaders
 
