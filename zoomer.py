@@ -118,7 +118,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
 
     for name in leaders:
         pug.click(search_bar)
-        pug.typewrite(name, 0.1)
+        pug.typewrite(name)
 
         capture.part_screenshot(x, y, width, height, "meeting")
         wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
@@ -130,12 +130,13 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file)
         
         blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
-        close_btn = capture.find_img_coordinates("close_search.png", "meeting")
 
         if blue_close_btn is not None:
             pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
-        elif close_btn is not None:
-            pug.click(close_btn[0] - 10, close_btn[1])
+        else:
+            close_btn = capture.find_img_coordinates("close_search.png", "meeting")
+            if close_btn is not None:
+                pug.click(close_btn[0] - 7, close_btn[1])
 
     return leaders
 
