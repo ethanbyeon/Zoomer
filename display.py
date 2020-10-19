@@ -28,17 +28,20 @@ FILES = {'Input': '', 'Output': ''}
 
 # MESSAGES
 f_in_msg = ("Select an Excel file (.csv) that contains"
-            "\na student roster for the desired class/period.")
-f_out_msg = ("Select an empty Excel file (.csv) that would store"
-            "\nthe attendance results for the desired class/period.")
+                "\na student roster for the desired class/period.")
+f_out_msg = ("Select an empty Excel file (.csv) that"
+                "\nwould store the attendance results"
+                "\nfor the desired class/period.")
 student_msg = ("Admit students from the waiting room."
-                "\nPress this button again if the waiting room is not empty.")
+                "\nIf the waiting room is not empty,"
+                "\npress this button again.")
 leaders_msg = ("Admit group leaders from the waiting room."
-            "\n Press this button again if the waiting room is not empty.")
+                "\nIf the waiting room is not empty,"
+                "\npress this button again.")
 output_msg = ("Please make sure to: "
-            "\nMinimize all unused windows "
-            "\nKeep the Zoom app visible on the desktop"
-            "\n(Hover over a button for more information)")
+                "\nMinimize all unused windows "
+                "\nKeep the Zoom app visible on the desktop"
+                "\n(Hover over a button for more information)")
 
 class Display(tk.Frame):
 
