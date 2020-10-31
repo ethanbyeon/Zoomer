@@ -11,6 +11,9 @@ WIN_H = 240
 BTN_W = 20
 BTN_H = 2
 
+FONT = ('arial', 10, 'bold')
+FILES = {'Input': '', 'Output': ''}
+
 COLOR = {
     'danger': '#F04D43',
     'grey': '#CED4DA',
@@ -21,16 +24,14 @@ COLOR = {
     'white': '#F8F9FA',
 }
 
-FONT = ('arial', 10, 'bold')
-
-FILES = {'Input': '', 'Output': ''}
-
 # MESSAGE
-tip_msg = ("Please make sure to: "
-                "\nMinimize all unused windows "
-                "\nKeep the Zoom app visible on the desktop")
-important_msg = ("\nIf the waiting room is not empty,"
-                    "\npress the desired attendance button again.")
+tip_msg = ("Tips: "
+            "\nDon't have tabs overlap the Zoom App"
+            "\nAdd student roster and a blank attendance sheet"
+            "\nIf all students are not admitted,"
+            "\npress the desired button again after"
+            "\nthe selected students load into the main session.")
+
 
 class Display(tk.Frame):
 
@@ -60,7 +61,7 @@ class Display(tk.Frame):
             height=BTN_H, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white', 
             command=lambda: addFile("Input", self.f_in_label, self.f_in_btn, self.f_out_btn))
-        self.f_out_btn = tk.Button(self, text="Attendance Results", font=FONT, 
+        self.f_out_btn = tk.Button(self, text="Attendance Sheet", font=FONT, 
             height=BTN_H, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white',
             command=lambda: addFile("Output", self.f_out_label, self.f_in_btn, self.f_out_btn))
@@ -77,7 +78,6 @@ class Display(tk.Frame):
 
         # HELP LABEL
         self.tip_label = tk.Label(self, text=tip_msg, font=FONT, bg=COLOR['grey'])
-        self.important_label = tk.Label(self, text=important_msg, font=FONT, bg=COLOR['grey'], fg=COLOR['danger'])
         
         # GRID
         self.f_in_label.grid(row=1, column=0, padx=10, pady=(20,0), sticky='WENS')
@@ -89,8 +89,7 @@ class Display(tk.Frame):
         self.student_btn.grid(row=3, column=0)
         self.leaders_btn.grid(row=3, column=1)
 
-        self.tip_label.grid(row=5, column=0, pady=0, columnspan=2)
-        self.important_label.grid(row=4, column=0, pady=0, columnspan=2)
+        self.tip_label.grid(row=5, column=0, pady=(5,0), columnspan=2)
         
         # BINDS
         self.student_btn.bind('<Enter>', self.student_hover)

@@ -2,9 +2,11 @@ import capture
 import pandas as pd
 import pyautogui as pug
 import time
+
 from tkinter import filedialog
 
-    
+
+# PREPARES A DEFAULT DATAFRAME FOR ATTENDANCE
 def setup_df(input_file, output_file):
     
     student_df = pd.read_csv(input_file)
@@ -29,15 +31,65 @@ def setup_df(input_file, output_file):
     output_df.to_csv(output_file, index=False)
 
 
+# CHECKS IF THE STUDENT ATTENDANCE BUTTON OR GROUP LEADER ATTENDANCE BUTTON IS PRESSED
 def attendance(input_file, output_file, student_type):
     
     if student_type == "Student":
 
-        waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
-        dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+        check_queue(output_file)
 
-        if waiting_room_label is not None and dot_btn is not None:
-            x1, y1 = waiting_room_label[0] - 35, waiting_room_label[1] + 10
+        # waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
+        # dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+
+        # if waiting_room_label is not None:
+        #     if dot_btn is not None:
+        #         x1, y1 = waiting_room_label[0] - 15, waiting_room_label[1] + 10
+        #         x2, y2 = dot_btn[0], dot_btn[1] - 10
+        #         width = x2 - x1
+        #         height = y2 - y1
+                
+        #         nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
+        #         if nonverbal_btns is not None:
+        #             x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
+        #             width = x2 - x1
+        #             height = y2 - y1
+
+        #         capture.part_screenshot(x1, y1, width, height, "meeting")
+        #         validate_students(x1, y1, output_file)
+        # else:
+        #     return None
+
+    elif student_type == "Leader":
+
+        dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+        search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
+        
+        if search_bar is not None:
+            if dot_btn is not None:
+                x1, y1 = search_bar[0] - 145, search_bar[1] + 30
+                x2, y2 = dot_btn[0], dot_btn[1] - 10
+                width = x2 - x1
+                height = y2 - y1
+
+                nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
+                if nonverbal_btns is not None:
+                    x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
+                    width = x2 - x1
+                    height = y2 - y1
+
+                validate_leaders(x1, y1, width, height, search_bar, input_file, output_file)
+        else:
+            return None
+
+
+# CHECKS IF THERE ARE PARTICIPANTS IN THE WAITING ROOM
+def check_queue(output_file):
+    waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
+    dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+
+    if waiting_room_label is not None:
+        if dot_btn is not None:
+            x1, y1 = waiting_room_label[0] - 15, waiting_room_label[1] + 10
             x2, y2 = dot_btn[0], dot_btn[1] - 10
             width = x2 - x1
             height = y2 - y1
@@ -50,34 +102,12 @@ def attendance(input_file, output_file, student_type):
 
             capture.part_screenshot(x1, y1, width, height, "meeting")
             validate_students(x1, y1, output_file)
-
-        else:
-            return None
-
-    elif student_type == "Leader":
-
-        dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
-        search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
-        
-        if search_bar is not None and dot_btn is not None:
-            x1, y1 = search_bar[0] - 140, search_bar[1] + 30
-            x2, y2 = dot_btn[0], dot_btn[1] - 10
-            width = x2 - x1
-            height = y2 - y1
-
-            nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
-            if nonverbal_btns is not None:
-                x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
-                width = x2 - x1
-                height = y2 - y1
-        
-        else:
-            return None
-        
-        validate_leaders(x1, y1, width, height, search_bar, input_file, output_file)
+            return check_queue(output_file)
+    else:
+        return False
 
 
-# CHECKS IF THE STUDENT'S NAME IN WAITING ROOM IS WRITTEN IN THE STUDENT ROSTER
+# CHECKS IF THE PARTICPANT'S NAME IS IN THE DATAFRAME BEFORE CONSIDERING ADMISSION
 def validate_students(x, y, output_file):
     
     wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
@@ -106,6 +136,7 @@ def validate_students(x, y, output_file):
     return attendance_list
 
 
+# USES THE PARTICIPANTS SEARCH BAR TO FILTER GROUP LEADERS
 def validate_leaders(x, y, width, height, search_bar, input_file, output_file): 
 
     leaders = set()
@@ -122,8 +153,8 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
 
         capture.part_screenshot(x, y, width, height, "meeting")
         wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-        wait_names = set(student['Text'] for student in wait_list)   
-
+        wait_names = set(student['Text'].replace('‘','') for student in wait_list)   
+        
         present_leaders = wait_names.intersection(leaders)
         absent_leaders = leaders.difference(wait_names)
         
@@ -141,6 +172,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
     return leaders
 
 
+# MARKS THE STATUS OF THE STUDENT AND CALLS FOR STUDENT ADMISSION IF NECESSARY
 def write_to_csv(x, y, present, absent, wait_list, output_file):
     output_df = pd.read_csv(output_file)
     output_df.fillna("NA", inplace=True)
@@ -161,9 +193,13 @@ def write_to_csv(x, y, present, absent, wait_list, output_file):
     output_df.to_csv(output_file, index=False)
 
 
+# ADMITS STUDENT AFTER VALIDATING THROUGH DATAFRAME
 def admit_student(x, y, student, wait_list):
-    match = next(person for person in wait_list if person['Text'] == student)
+
+    match = None
+    for person in wait_list:
+        if person['Text'] == student:
+            match = person
     
-    if match is not None:
-        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
-        pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
+    pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+    pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
