@@ -118,10 +118,10 @@ def addFile(file, label, in_btn, out_btn):
         f = file_name.split('/')
         
         if file == "Input":
-            label.config(text="Roster: " + f[-1])
+            label.config(text=f[-1])
             in_btn['bg'] = COLOR['success']
         else:
-            label.config(text="Results: " + f[-1])
+            label.config(text=f[-1])
             out_btn['bg'] = COLOR['success']
 
     if FILES['Input'] != '' and FILES['Output'] != '':

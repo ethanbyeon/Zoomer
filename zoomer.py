@@ -6,7 +6,7 @@ import time
 from tkinter import filedialog
 
 
-# PREPARES A DEFAULT DATAFRAME FOR ATTENDANCE
+# PREPARES A DEFAULT DATAFRAME FOR ATTENDANCE SHEET
 def setup_df(input_file, output_file):
     
     student_df = pd.read_csv(input_file)
@@ -37,27 +37,6 @@ def attendance(input_file, output_file, student_type):
     if student_type == "Student":
 
         check_queue(output_file)
-
-        # waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
-        # dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
-
-        # if waiting_room_label is not None:
-        #     if dot_btn is not None:
-        #         x1, y1 = waiting_room_label[0] - 15, waiting_room_label[1] + 10
-        #         x2, y2 = dot_btn[0], dot_btn[1] - 10
-        #         width = x2 - x1
-        #         height = y2 - y1
-                
-        #         nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
-        #         if nonverbal_btns is not None:
-        #             x2, y2 = dot_btn[0], nonverbal_btns[1] - 20
-        #             width = x2 - x1
-        #             height = y2 - y1
-
-        #         capture.part_screenshot(x1, y1, width, height, "meeting")
-        #         validate_students(x1, y1, output_file)
-        # else:
-        #     return None
 
     elif student_type == "Leader":
 
@@ -107,7 +86,7 @@ def check_queue(output_file):
         return False
 
 
-# CHECKS IF THE PARTICPANT'S NAME IS IN THE DATAFRAME BEFORE CONSIDERING ADMISSION
+# VERIFIES PARTICPANT'S NAME IS IN THE DATAFRAME BEFORE ADMISSION
 def validate_students(x, y, output_file):
     
     wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
@@ -136,7 +115,7 @@ def validate_students(x, y, output_file):
     return attendance_list
 
 
-# USES THE PARTICIPANTS SEARCH BAR TO FILTER GROUP LEADERS
+# FILTERS THROUGH GROUP LEADERS USING THE PARTICIPANTS SEARCH BAR
 def validate_leaders(x, y, width, height, search_bar, input_file, output_file): 
 
     leaders = set()
@@ -172,7 +151,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
     return leaders
 
 
-# MARKS THE STATUS OF THE STUDENT AND CALLS FOR STUDENT ADMISSION IF NECESSARY
+# MARKS THE STATUS OF THE STUDENT AND CALLS FOR STUDENT ADMISSION IF PRESENT
 def write_to_csv(x, y, present, absent, wait_list, output_file):
     output_df = pd.read_csv(output_file)
     output_df.fillna("NA", inplace=True)
@@ -193,7 +172,7 @@ def write_to_csv(x, y, present, absent, wait_list, output_file):
     output_df.to_csv(output_file, index=False)
 
 
-# ADMITS STUDENT AFTER VALIDATING THROUGH DATAFRAME
+# ADMITS STUDENT AFTER VALIDATING WITH DATAFRAME
 def admit_student(x, y, student, wait_list):
 
     match = None
