@@ -31,7 +31,7 @@ def find_img_coordinates(img_name, img_folder):
     needle = os.path.abspath("images/" + img_folder + '/' + img_name)
     haystack = os.path.abspath("images/user/desktop_window.png")
     
-    img_coordinates = pug.locate(needle, haystack, grayscale=False)
+    img_coordinates = pug.locate(needle, haystack, grayscale=False, confidence=0.9)
     if img_coordinates is not None:
         img_getX, img_getY = pug.center(img_coordinates)
         return img_getX, img_getY
