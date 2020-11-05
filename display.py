@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-import zoomer
+import automation
 
 from tkinter import filedialog
 
@@ -38,9 +38,8 @@ class Display(tk.Frame):
     @classmethod
     def main(cls):
         root = tk.Tk()
-        root.title("Zoomer")
-        root.iconbitmap('images/app/check.ico')
-        root.resizable(width=False, height=False)
+        root.title("Neato's Zoom Automation")
+        root.iconbitmap('images/user/check.ico')
         root.configure(bg=COLOR['grey'])
         root.geometry(f'{WIN_W}x{WIN_H}')
 
@@ -125,12 +124,12 @@ def addFile(file, label, in_btn, out_btn):
             out_btn['bg'] = COLOR['success']
 
     if FILES['Input'] != '' and FILES['Output'] != '':
-        zoomer.setup_df(FILES['Input'], FILES['Output'])
+        automation.setup_df(FILES['Input'], FILES['Output'])
 
 
 def attendance(student_type, f_in_label, f_out_label):
     if FILES['Input'] != '' and FILES['Output'] != '':
-        zoomer.attendance(FILES['Input'], FILES['Output'], student_type)
+        automation.attendance(FILES['Input'], FILES['Output'], student_type)
 
            
 if __name__ == '__main__':

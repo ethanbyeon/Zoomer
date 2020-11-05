@@ -2,12 +2,13 @@ import cv2
 import os
 import mss
 import pyautogui as pug
-import pytesseract as tess
+import pytesseract
 import re
 
 from PIL import Image
 from pytesseract import Output
 
+pytesseract.pytesseract.tesseract_cmd = 'Tesseract-OCR\\tesseract.exe'
 
 def full_screenshot():
 
@@ -44,7 +45,7 @@ def get_text_coordinates(img_name, img_folder):
 
     img = cv2.imread("images/" + img_folder + '/' + img_name)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    d = tess.image_to_data(gray, output_type=Output.DICT)
+    d = pytesseract.image_to_data(gray, output_type=Output.DICT)
     
     text_coords = []
     for i in range(0, len(d['text'])):
