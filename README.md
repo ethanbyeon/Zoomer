@@ -1,1 +1,1 @@
-# Zoomer-Bot
+# NZA (Neato Zoom Automation)
