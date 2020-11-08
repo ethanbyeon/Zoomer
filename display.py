@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 
 WIN_W = 370
-WIN_H = 240
+WIN_H = 250
 
 BTN_W = 20
 BTN_H = 2
@@ -25,12 +25,13 @@ COLOR = {
 }
 
 # MESSAGE
-tip_msg = ("Tips: "
+tip_msg = ("\n"
+            "Tips: "
             "\nDon't have tabs overlap the Zoom App"
             "\nAdd student roster and a blank attendance sheet"
-            "\nIf all students are not admitted,"
-            "\npress the desired button again after"
-            "\nthe selected students load into the main session.")
+            "\nOnly use the \"Admit Group Leaders\" button"
+            "\n before using the \"Take Attendance\" button."
+        )
 
 
 class Display(tk.Frame):

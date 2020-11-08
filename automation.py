@@ -66,158 +66,90 @@ def attendance(input_file, output_file, category):
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
     if dot_btn is not None:
+        
+        search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
 
-        if category == "Student":
-            check_queue(dot_btn, output_file)
+        if search_bar is not None:
+            x, y = search_bar[0] - 145, search_bar[1] + 30
+            x2, y2 = dot_btn[0], dot_btn[1] - 10
+            width = x2 - x
+            height = y2 - y
 
-        elif category == "Leader":
-            search_leader(dot_btn, input_file, output_file)
+            if category == "Student":
+                validate_students(x, y, width, height, search_bar, input_file, output_file)
+
+            elif category == "Leader":
+                validate_leaders(x, y, width, height, search_bar, input_file, output_file)
 
     else:
         return None
 
 
-def check_queue(dot_btn, output_file):
-    """Checks if there are participants in the waiting room.
+def validate_students(x, y, width, height, search_bar, input_file, output_file):
+    """Verifies participant names through a dataframe before admission.
 
-    This function records the coordinates of the waiting room label if it is present.
-    The coordinates of the waiting room label are used in conjunction with the 
-    coordinates of the dot/more button and the nonverbal buttons (if it is present) 
-    to create a precise region for the computer to analyze. After capturing the 
-    specified region, each participant's name in the waiting room is validated 
-    through the validate_students() function.
+    This function types the name of each group leader found in the student roster into 
+    the search bar and captures a precise region (provided by the x-y and width-height args).
+    Then, the name from the search result is extracted from the captured region and recorded in a set.
+    The name in the set is then added to a "pool" that serves as a base for performing
+    set operations.
+    
+    The present student is identified if the name extracted from the captured
+    region can be found in the student roster.
 
+    The absent student is identified if the name in the student roster
+    cannot be extracted from the captured region.
+
+    After this process, the present_student set and absent_students set are passed into
+    the record_student() function to be recorded into the dataframe (attendance sheet).
+    
     Args:
-        dot_btn: The dot/more button coordinates.
-        output_file: The attendance sheet.
-
-    Returns: 
-        None
-    """
-
-    waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
-
-    if waiting_room_label is not None:
-        x, y = waiting_room_label[0] - 15, waiting_room_label[1] + 10
-        x2, y2 = dot_btn[0], dot_btn[1] - 10
-        width = x2 - x
-        height = y2 - y
-
-        width, height = check_nonverbal(x, y, width, height, dot_btn[0])
-        
-        capture.part_screenshot(x, y, width, height, "meeting")
-        validate_students(x, y, output_file)
-
-
-def search_leader(dot_btn, input_file, output_file):
-    """Searches for group leaders using the participants search bar.
-
-    This function records the coordinates of the participants search bar if it is present.
-    The coordinates of the participants search bar are used in conjunction with 
-    the coordinates of the dot/more button and the nonverbal buttons (if it is present)
-    to create a precise region for the computer to analyze. After capturing the
-    specified region, each participant's name that appears in the region from the search
-    result is validated through the validate_leaders() function.
-
-    Args:
-        dot_btn: The dot/more button coordinates.
+        x: The x-coordinate of the waiting-room label.
+        y: The y-coordinate of the waiting-room label.
+        width: The width of the captured region.
+        height: The height of the captured region.
+        search_bar: The coordinates of the search bar.
         input_file: The student roster.
         output_file: The attendance sheet.
 
     Return:
         None
     """
-
-    search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
-
-    if search_bar is not None:
-        x, y = search_bar[0] - 145, search_bar[1] + 30
-        x2, y2 = dot_btn[0], dot_btn[1] - 10
-        width = x2 - x
-        height = y2 - y
-
-        width, height = check_nonverbal(x, y, width, height, dot_btn[0])
-        validate_leaders(x, y, width, height, search_bar, input_file, output_file)
-
-
-def check_nonverbal(x, y, width, height, dot_xpos):
-    """Returns the width and height of the captured region that accounts for the nonverbal buttons.
     
-    This function adjusts the width and height of the captured region 
-    according to the coordinates of the nonverbal buttons.
+    students = set()
 
-    Args:
-        x: The x-coordinate of the waiting-room label.
-        y: The y-coordinate of the waiting-room label.
-        width: The width of the captured region.
-        height: The height of the captured region.
-        dot_xpos: The x-coordinate of the dot/more button.
-
-    Return:
-        new_width, new_height: int, int
-            The new adjusted width and height that accounts for the nonverbal buttons.
-        width, heigth: int, int
-            The original width and height that does not account for the nonverbal buttons.
-    """
+    student_df = pd.read_csv(input_file)
+    student_df.fillna('NA', inplace=True)
     
-    nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
-    
-    if nonverbal_btns is not None:
-        x2, y2 = dot_xpos, nonverbal_btns[1] - 20
-        new_width = x2 - x
-        new_height = y2 - y
-        
-        return new_width, new_height
-    else:
-        return width, height
-
-
-def validate_students(x, y, output_file):
-    """Verifies participant names through a dataframe before admission.
-
-    This function extracts text from the captured region and records them in a set.
-    Each name in the set is then added to a "pool" that serves as a base for performing
-    set operations.
-    
-    The present students are found in the list of names extracted from the captured
-    region and are recorded in the student roster.
-
-    The absent students are not found in the list of names extracted from the captured
-    region but are recorded in the student roster.
-
-    The unknown students are found in both the list of names extracted from the
-    captured region but are not recorded in the student roster.
-
-    After this process, the present_students set and absent_students set are passed into
-    the write_to_csv() function to be recorded into the dataframe (attendance sheet).
-    
-    Args:
-        x: The x-coordinate of the waiting-room label.
-        y: The y-coordinate of the waiting-room label.
-        student: The student name.
-        wait_list: The list of coordinates of each student's name that are found the waiting room.
-
-    Return:
-        attendance_list: dict
-            Returns
-    """
-    
-    wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-    wait_names = set(student['Text'] for student in wait_list)
-    df_pool = set()
-    
-    output_df = pd.read_csv(output_file)
-    output_df.fillna("NA", inplace=True)
-    for r in range(0, len(output_df.iloc[:, 1:])):
-        for c in output_df.iloc[r, 1:]:
+    for r in range(0, len(student_df.iloc[:, 1:])):
+        for c in student_df.iloc[r, 1:]:
             if c != "NA":
-                df_pool.add(c)
+                info = c.replace(',', '').split(' ')
+                name = info[1] + ' ' + info[0]
+                students.add(name)
 
-    present_students = wait_names.intersection(df_pool)
-    absent_students = df_pool.difference(wait_names)
-    unknown_students = wait_names.difference(df_pool)
+    for name in students:
+        print(name)
+        pug.click(search_bar)
+        pug.typewrite(name)
 
-    write_to_csv(x, y, present_students, absent_students, wait_list, output_file)
+        capture.part_screenshot(x, y, width, height, "meeting")
+        wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
+        wait_name = set(student['Text'].replace('‘','') for student in wait_list)
+        
+        present_student = wait_name.intersection(students)
+        absent_students = students.difference(wait_name)
+        
+        record_student(x, y, present_student, absent_students, wait_list, output_file)
+        
+        blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
+
+        if blue_close_btn is not None:
+            pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
+        else:
+            close_btn = capture.find_img_coordinates("close_search.png", "meeting")
+            if close_btn is not None:
+                pug.click(close_btn[0] - 7, close_btn[1])
 
 
 def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
@@ -227,7 +159,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
     the search bar and captures a precise region (provided by the x-y and width-height args). 
     Then, the name from the search result is extracted from the captured region and is put through
     a set operation similar to the validate_students() function. After the status of the group leader
-    is determined, the present_leaders set and absent_leaders set are passed into the write_to_csv()
+    is determined, the present_leader set and absent_leaders set are passed into the write_to_csv()
     function to be recorded into the dataframe (attendance sheet).
     
     Args:
@@ -235,11 +167,12 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         y: The y-coordinate of the waiting-room label.
         width: The width of the captured region.
         height: The height of the captured region.
+        search_bar: The coordinates of the search bar.
         input_file: The student roster.
         output_file: The attendance sheet.
 
     Return:
-        set: The set of the names of group leaders.
+        None
     """
 
     leaders = set()
@@ -256,12 +189,12 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
 
         capture.part_screenshot(x, y, width, height, "meeting")
         wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-        wait_names = set(student['Text'].replace('‘','') for student in wait_list)   
+        wait_name = set(student['Text'].replace('‘','') for student in wait_list)   
         
-        present_leaders = wait_names.intersection(leaders)
-        absent_leaders = leaders.difference(wait_names)
+        present_leader = wait_name.intersection(leaders)
+        absent_leaders = leaders.difference(wait_name)
         
-        write_to_csv(x, y, present_leaders, absent_leaders, wait_list, output_file)
+        record_student(x, y, present_leader, absent_leaders, wait_list, output_file)
         
         blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
 
@@ -273,7 +206,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
                 pug.click(close_btn[0] - 7, close_btn[1])
 
 
-def write_to_csv(x, y, present, absent, wait_list, output_file):
+def record_student(x, y, present_set, absent_set, wait_list, output_file):
     """Records the status of the student and calls for student admission if necessary.
 
     This function iterates over each row in the dataframe (attendance sheet) and marks
@@ -289,8 +222,8 @@ def write_to_csv(x, y, present, absent, wait_list, output_file):
     Args:
         x: The x-coordinate of the waiting-room label.
         y: The y-coordinate of the waiting-room label.
-        present: The list of present students.
-        absent: The list of absent students.
+        present_set: The set of present students.
+        absent_set: The set of absent students.
         wait_list: The list of coordinates of each student's name that are found the waiting room.
         output_file: The attendance sheet.
         
@@ -305,11 +238,11 @@ def write_to_csv(x, y, present, absent, wait_list, output_file):
         for c in output_df.iloc[r, 1:2]:
             if output_df.iat[r, 2] == "PRESENT":
                 continue
-            if c in present or c in absent:
-                if c in present:
+            else:
+                if c in present_set:
                     output_df.iat[r, 2] = "PRESENT"
                     admit_student(x, y, c, wait_list)
-                if c in absent:
+                if c in absent_set:
                     output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
