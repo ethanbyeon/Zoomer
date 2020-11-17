@@ -39,7 +39,7 @@ class Display(tk.Frame):
     @classmethod
     def main(cls):
         root = tk.Tk()
-        root.title("Neato's Zoom Automation")
+        root.title("Neato Zoom Automation")
         root.iconbitmap('images/user/check.ico')
         root.configure(bg=COLOR['grey'])
         root.geometry(f'{WIN_W}x{WIN_H}')

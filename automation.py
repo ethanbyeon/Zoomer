@@ -64,16 +64,16 @@ def attendance(input_file, output_file, category):
     """
 
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
-
+    
     if dot_btn is not None:
         
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
 
         if search_bar is not None:
             x, y = search_bar[0] - 145, search_bar[1] + 30
-            x2, y2 = dot_btn[0], dot_btn[1] - 10
+            x2 = dot_btn[0]
             width = x2 - x
-            height = y2 - y
+            height = y
 
             if category == "Student":
                 validate_students(x, y, width, height, search_bar, input_file, output_file)
@@ -118,38 +118,30 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
     
     students = set()
 
-    student_df = pd.read_csv(input_file)
-    student_df.fillna('NA', inplace=True)
-    
-    for r in range(0, len(student_df.iloc[:, 1:])):
-        for c in student_df.iloc[r, 1:]:
-            if c != "NA":
-                info = c.replace(',', '').split(' ')
-                name = info[1] + ' ' + info[0]
-                students.add(name)
+    output_df = pd.read_csv(output_file)
+    output_df.fillna("NA", inplace=True)
+
+    for r in range(0, len(output_df.iloc[:, 1:2])):
+        for c in output_df.iloc[r, 1:2]:
+            if output_df.iat[r, 2] == "NA" or output_df.iat[r, 2] == "ABSENT":
+                students.add(c)
 
     for name in students:
         print(name)
-        pug.click(search_bar)
+        pug.moveTo(search_bar)
         pug.typewrite(name)
 
-        capture.part_screenshot(x, y, width, height, "meeting")
-        wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-        wait_name = set(student['Text'].replace('‘','') for student in wait_list)
+        meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
-        present_student = wait_name.intersection(students)
-        absent_students = students.difference(wait_name)
-        
-        record_student(x, y, present_student, absent_students, wait_list, output_file)
-        
-        blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
-
-        if blue_close_btn is not None:
-            pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
-        else:
-            close_btn = capture.find_img_coordinates("close_search.png", "meeting")
-            if close_btn is not None:
-                pug.click(close_btn[0] - 7, close_btn[1])
+        if meeting_label is not None:
+            capture.part_screenshot(x, y, width, (meeting_label[1] - 5) - height, "meeting")
+            wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
+            wait_name = set(student['Text'].replace('‘','') for student in wait_list)
+            
+            present_student = wait_name.intersection(students)
+            absent_students = students.difference(wait_name)
+            
+            record_student(x, y, present_student, absent_students, wait_list, output_file)
 
 
 def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
@@ -184,26 +176,21 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         leaders.add(name)
 
     for name in leaders:
-        pug.click(search_bar)
+        print(name)
+        pug.moveTo(search_bar)
         pug.typewrite(name)
 
-        capture.part_screenshot(x, y, width, height, "meeting")
-        wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-        wait_name = set(student['Text'].replace('‘','') for student in wait_list)   
+        meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
-        present_leader = wait_name.intersection(leaders)
-        absent_leaders = leaders.difference(wait_name)
-        
-        record_student(x, y, present_leader, absent_leaders, wait_list, output_file)
-        
-        blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
-
-        if blue_close_btn is not None:
-            pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
-        else:
-            close_btn = capture.find_img_coordinates("close_search.png", "meeting")
-            if close_btn is not None:
-                pug.click(close_btn[0] - 7, close_btn[1])
+        if meeting_label is not None:
+            capture.part_screenshot(x, y, width, (meeting_label[1] - 5) - height, "meeting")
+            wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
+            wait_name = set(student['Text'].replace('‘','') for student in wait_list)   
+            
+            present_leader = wait_name.intersection(leaders)
+            absent_leaders = leaders.difference(wait_name)
+            
+            record_student(x, y, present_leader, absent_leaders, wait_list, output_file)
 
 
 def record_student(x, y, present_set, absent_set, wait_list, output_file):
@@ -240,10 +227,19 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file):
                 continue
             else:
                 if c in present_set:
-                    output_df.iat[r, 2] = "PRESENT"
                     admit_student(x, y, c, wait_list)
-                if c in absent_set:
-                    output_df.iat[r, 2] = "ABSENT"
+                    output_df.iat[r, 2] = "PRESENT"
+                    
+                    blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
+
+                    if blue_close_btn is not None:
+                        pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
+                    else:
+                        close_btn = capture.find_img_coordinates("close_search.png", "meeting")
+                        if close_btn is not None:
+                            pug.click(close_btn[0] - 7, close_btn[1])
+                            if c in absent_set:
+                                output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
     
@@ -272,6 +268,7 @@ def admit_student(x, y, student, wait_list):
     for person in wait_list:
         if person['Text'] == student:
             match = person
-    
-    pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
-    pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
+
+    if match is not None:
+        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+        pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))

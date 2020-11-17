@@ -8,7 +8,7 @@ import re
 from PIL import Image
 from pytesseract import Output
 
-pytesseract.pytesseract.tesseract_cmd = 'Tesseract-OCR\\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = 'Tesseract-OCR\\tesseract.exe'
 
 def full_screenshot():
 
