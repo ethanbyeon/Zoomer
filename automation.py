@@ -128,7 +128,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
 
     for name in students:
         print(name)
-        pug.moveTo(search_bar)
+        pug.click(search_bar)
         pug.typewrite(name)
 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
@@ -177,7 +177,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
 
     for name in leaders:
         print(name)
-        pug.moveTo(search_bar)
+        pug.click(search_bar)
         pug.typewrite(name)
 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
