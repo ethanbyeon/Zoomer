@@ -142,7 +142,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
             absent_students = students.difference(wait_name)
             
             record_student(x, y, present_student, absent_students, wait_list, output_file)
-
+            search()
 
 def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
     """Verifies the names of group leaders through a dataframe before admission.
@@ -191,6 +191,13 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
             absent_leaders = leaders.difference(wait_name)
             
             record_student(x, y, present_leader, absent_leaders, wait_list, output_file)
+            search()
+
+
+def search():
+    blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
+    if blue_close_btn is not None:
+        pug.moveTo(blue_close_btn[0] - 5, blue_close_btn[1])
 
 
 def record_student(x, y, present_set, absent_set, wait_list, output_file):
@@ -229,17 +236,9 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file):
                 if c in present_set:
                     admit_student(x, y, c, wait_list)
                     output_df.iat[r, 2] = "PRESENT"
-                    
-                    blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
 
-                    if blue_close_btn is not None:
-                        pug.click(blue_close_btn[0] - 10, blue_close_btn[1])
-                    else:
-                        close_btn = capture.find_img_coordinates("close_search.png", "meeting")
-                        if close_btn is not None:
-                            pug.click(close_btn[0] - 7, close_btn[1])
-                            if c in absent_set:
-                                output_df.iat[r, 2] = "ABSENT"
+                if c in absent_set:
+                    output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
     
