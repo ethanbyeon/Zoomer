@@ -78,6 +78,14 @@ class Display(tk.Frame):
 
         # HELP LABEL
         self.tip_label = tk.Label(self, text=tip_msg, font=FONT, bg=COLOR['grey'])
+
+        # TESTING
+        self.test_btn = tk.Button(self, text="TEST", font=FONT,
+            height=BTN_H, width=BTN_W, borderwidth=0,
+            fg="white", bg=COLOR['mango'], activebackground=COLOR['mint'], activeforeground='white',
+            command=lambda: automation.test())
+
+        self.test_btn.grid(row=4, column=0, pady=(10,0), columnspan=2)
         
         # GRID
         self.f_in_label.grid(row=1, column=0, padx=10, pady=(20,0), sticky='WENS')

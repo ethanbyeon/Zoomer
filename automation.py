@@ -10,8 +10,8 @@ def setup_df(input_file, output_file):
     """Prepares a default dataframe for an attendance sheet.
 
         This function reads an input file to create a dataframe for the output file
-        that records the student's ID, name, status, and time. The student names
-        are arranged alphabetically and the "Status" and "Time" columns are set to "NA".
+        that records the student's ID, name, status, and time of admittance. The student names
+        are arranged alphabetically, and the "Status" and "Time" columns are set to "NA".
 
         Args:
             input_file: The student roster.
@@ -88,11 +88,10 @@ def attendance(input_file, output_file, category):
 def validate_students(x, y, width, height, search_bar, input_file, output_file):
     """Verifies participant names through a dataframe before admission.
 
-    This function types the name of each group leader found in the student roster into 
-    the search bar and captures a precise region (provided by the x-y and width-height args).
+    This function types the name of each group leader, found in the student roster, into 
+    the search bar and captures a precise region.
     Then, the name from the search result is extracted from the captured region and recorded in a set.
-    The name in the set is then added to a "pool" that serves as a base for performing
-    set operations.
+    The name in the set is then added to a "pool" that serves as a base for performing set operations.
     
     The present student is identified if the name extracted from the captured
     region can be found in the student roster.
@@ -148,8 +147,8 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
     """Verifies the names of group leaders through a dataframe before admission.
 
     This function types the name of each group leader found in the student roster into 
-    the search bar and captures a precise region (provided by the x-y and width-height args). 
-    Then, the name from the search result is extracted from the captured region and is put through
+    the search bar and captures a precise region. 
+    Then, the name from the search result is extracted from the captured region, and it is put through
     a set operation similar to the validate_students() function. After the status of the group leader
     is determined, the present_leader set and absent_leaders set are passed into the write_to_csv()
     function to be recorded into the dataframe (attendance sheet).
@@ -271,3 +270,58 @@ def admit_student(x, y, student, wait_list):
     if match is not None:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
+
+
+def test():
+    setup_df("test/groups.csv", "test/out.csv")
+    attendance_test()
+
+def attendance_test():
+    dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+
+    if dot_btn is not None:
+        waiting_room_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
+        
+        if waiting_room_label is not None:
+            x, y = waiting_room_label[0] - 15, waiting_room_label[1] + 10
+            x2, y2 = dot_btn[0], dot_btn[1] - 10
+            width = x2 - x
+            height = y2 - y
+
+            width, height = check_nonverbal(x, y, width, height, dot_btn[0])
+
+            capture.part_screenshot(x, y, width, height, "meeting")
+            val_students(x, y, "test/out.csv")
+
+    else:
+        return None
+
+def check_nonverbal(x, y, w, h, dot_x):
+    nonverbal_btns = capture.find_img_coordinates("nonverbal_btns.png", "meeting")
+    
+    if nonverbal_btns is not None:
+        x2, y2 = dot_x, nonverbal_btns[1] - 20
+        new_width = x2 - x
+        new_height = y2 - y
+
+        return new_width, new_height
+    else:
+        return w, h
+
+def val_students(x, y, output_file="test/out.csv"):
+    wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
+    wait_names = set(student['Text'] for student in wait_list)
+    df_pool = set()
+
+    output_df = pd.read_csv(output_file)
+    output_df.fillna("NA", inplace=True)
+    for r in range(0, len(output_df.iloc[:, 1:])):
+        for c in output_df.iloc[r, 1:]:
+            if c != "NA":
+                 df_pool.add(c)
+
+    present_students = wait_names.intersection(df_pool)
+    absent_students = df_pool.difference(wait_names)
+    unknown_students = wait_names.difference(df_pool)
+
+    record_student(x, y, present_students, absent_students, wait_list, output_file="test/out.csv")
