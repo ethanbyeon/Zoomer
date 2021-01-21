@@ -9,11 +9,6 @@ import re
 from PIL import Image
 from pytesseract import Output
 
-def full_screenshot():
-
-    with mss.mss() as sct:
-        sct.shot(output="images/user/desktop_window.png")
-
 
 def part_screenshot(xpos, ypos, width, height, img_folder):
 
@@ -25,11 +20,11 @@ def part_screenshot(xpos, ypos, width, height, img_folder):
 
 
 def find_img_coordinates(img_name, img_folder, save=False):
+
     with mss.mss() as sct:
         needle = os.path.abspath("images/" + img_folder + '/' + img_name)
-        img_coordinates = pug.locate(needle, np.array(sct.grab(sct.monitors[0]).pixels, dtype=np.uint8), grayscale=False, confidence=0.8)
-        if save:
-            sct.shot(output='images/user/desktop_window.png')
+        haystack = np.array(sct.grab(sct.monitors[1]).pixels, dtype=np.uint8)
+        img_coordinates = pug.locate(needle, haystack, grayscale=False, confidence=0.8)
 
     if img_coordinates is not None:
         img_getX, img_getY = pug.center(img_coordinates)
@@ -40,11 +35,9 @@ def find_img_coordinates(img_name, img_folder, save=False):
 
 
 def get_text_coordinates(img_name, img_folder, save=False):
-    with mss.mss() as sct:
-        gray = cv2.cvtColor(np.array(sct.grab(sct.monitors[0]).pixels, dtype=np.uint8), cv2.COLOR_BGR2GRAY)
-        if save:
-            sct.shot(output="images/user/desktop_window.png")
-
+    
+    img = cv2.imread("images/" + img_folder + '/' + img_name)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     d = pytesseract.image_to_data(gray, output_type=Output.DICT)
 
     text_coords = []
@@ -75,4 +68,5 @@ def get_text_coordinates(img_name, img_folder, save=False):
                     #     (x + w + w2 + 10, y + h),
                     #     (0, 0, 255), 2)
                     # cv2.imshow('Output', gray)
+                    
     return text_coords

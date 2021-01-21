@@ -268,8 +268,7 @@ def admit_student(x, y, student, wait_list):
             match = person
 
     if match is not None:
-        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
-        pug.click(capture.find_img_coordinates("admit_btn.png", "meeting"))
+        pug.click(x + match['Coordinates']['x'] + 140, y + match['Coordinates']['y'])
 
 
 def test():
@@ -322,6 +321,6 @@ def val_students(x, y, output_file="test/out.csv"):
 
     present_students = wait_names.intersection(df_pool)
     absent_students = df_pool.difference(wait_names)
-    unknown_students = wait_names.difference(df_pool)
+
 
     record_student(x, y, present_students, absent_students, wait_list, output_file="test/out.csv")
