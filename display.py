@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 
 WIN_W = 370
-WIN_H = 250
+WIN_H = 300
 
 BTN_W = 20
 BTN_H = 2

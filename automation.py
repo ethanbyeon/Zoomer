@@ -84,7 +84,7 @@ def attendance(input_file, output_file, category):
     else:
         return None
 
-
+wait_x, wait_y, wait_w, wait_h = 0, 0, 0, 0
 def validate_students(x, y, width, height, search_bar, input_file, output_file):
     """Verifies participant names through a dataframe before admission.
 
@@ -132,8 +132,10 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
+        #FIX COORDINATES FOR SS
         if meeting_label is not None:
-            capture.part_screenshot(x, y, width, (meeting_label[1] - 5) - height, "meeting")
+            capture.waiting_ss(x, y, width, (meeting_label[1] - 5), "meeting")
+            wait_x, wait_y, wait_w, wait_h = x, y, width, (meeting_label[1] - 5)
             wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)
             
@@ -182,7 +184,7 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
         if meeting_label is not None:
-            capture.part_screenshot(x, y, width, (meeting_label[1] - 5) - height, "meeting")
+            capture.waiting_ss(x, y, width, (meeting_label[1] - 5) - height, "meeting")
             wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)   
             
@@ -195,8 +197,9 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
 
 def search():
     blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
+
     if blue_close_btn is not None:
-        pug.moveTo(blue_close_btn[0] - 5, blue_close_btn[1])
+        pug.click(blue_close_btn)
 
 
 def record_student(x, y, present_set, absent_set, wait_list, output_file):
@@ -265,12 +268,16 @@ def admit_student(x, y, student, wait_list):
     match = None
     for person in wait_list:
         if person['Text'] == student:
+            print("FOUND!!")
             match = person
 
     if match is not None:
-        pug.click(x + match['Coordinates']['x'] + 140, y + match['Coordinates']['y'])
+        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+        capture.waiting_ss(wait_x, wait_y, wait_w, wait_h, "meeting")
+        pug.click(pug.locateOnScreen('images/meeting/admit_btn.png', grayscale=True))
+              
 
-
+#TEST
 def test():
     setup_df("test/groups.csv", "test/out.csv")
     attendance_test()
@@ -288,8 +295,8 @@ def attendance_test():
             height = y2 - y
 
             width, height = check_nonverbal(x, y, width, height, dot_btn[0])
-
-            capture.part_screenshot(x, y, width, height, "meeting")
+            wait_x, wait_y, wait_w, wait_h = x, y, width, height
+            capture.waiting_ss(x, y, width, height, "meeting")
             val_students(x, y, "test/out.csv")
 
     else:
@@ -321,6 +328,5 @@ def val_students(x, y, output_file="test/out.csv"):
 
     present_students = wait_names.intersection(df_pool)
     absent_students = df_pool.difference(wait_names)
-
 
     record_student(x, y, present_students, absent_students, wait_list, output_file="test/out.csv")

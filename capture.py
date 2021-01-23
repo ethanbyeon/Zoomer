@@ -10,21 +10,19 @@ from PIL import Image
 from pytesseract import Output
 
 
-def part_screenshot(xpos, ypos, width, height, img_folder):
-
+def waiting_ss(xpos, ypos, width, height, img_folder):
     with mss.mss() as sct:
         area = {'top': int(ypos), 'left': int(xpos), 'width': int(width), 'height': int(height)}
-
+        
         area_img = sct.grab(area)
         mss.tools.to_png(area_img.rgb, area_img.size, output="images/" + img_folder + "/waiting_list.png")
 
 
 def find_img_coordinates(img_name, img_folder, save=False):
-
     with mss.mss() as sct:
         needle = os.path.abspath("images/" + img_folder + '/' + img_name)
         haystack = np.array(sct.grab(sct.monitors[1]).pixels, dtype=np.uint8)
-        img_coordinates = pug.locate(needle, haystack, grayscale=False, confidence=0.8)
+        img_coordinates = pug.locate(needle, haystack, grayscale=True, confidence=0.8)
 
     if img_coordinates is not None:
         img_getX, img_getY = pug.center(img_coordinates)
@@ -35,7 +33,6 @@ def find_img_coordinates(img_name, img_folder, save=False):
 
 
 def get_text_coordinates(img_name, img_folder, save=False):
-    
     img = cv2.imread("images/" + img_folder + '/' + img_name)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     d = pytesseract.image_to_data(gray, output_type=Output.DICT)
