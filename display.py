@@ -28,9 +28,7 @@ COLOR = {
 tip_msg = ("\n"
             "Tips: "
             "\nDon't have tabs overlap the Zoom App"
-            "\nAdd student roster and a blank attendance sheet"
-            "\nOnly use the \"Admit Group Leaders\" button"
-            "\n before using the \"Take Attendance\" button."
+            "\nPlease do not move the cursor after pressing a button."
         )
 
 
@@ -40,7 +38,7 @@ class Display(tk.Frame):
     def main(cls):
         root = tk.Tk()
         root.title("Neato Zoom Automation")
-        root.iconbitmap('images/user/check.ico')
+        root.iconbitmap('images/check.ico')
         root.configure(bg=COLOR['grey'])
         root.geometry(f'{WIN_W}x{WIN_H}')
 

@@ -42,7 +42,8 @@ def setup_df(input_file, output_file):
     output_df = pd.DataFrame(student)
     output_df.to_csv(output_file, index=False)
 
-
+# FIGURE OUT HOW TO OMIT STUDENTS THAT WERE ADMITTED TO REDUCE SEARCH TIME
+# MAYBE CONNECT APP TO A DATABASE
 def attendance(input_file, output_file, category):
     """Checks if the student or leader attendance button is pressed.
 
@@ -70,16 +71,15 @@ def attendance(input_file, output_file, category):
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
 
         if search_bar is not None:
-            x, y = search_bar[0] - 145, search_bar[1] + 30
-            x2 = dot_btn[0]
-            width = x2 - x
-            height = y
+            search_x, search_y = search_bar[0] - 40, search_bar[1] + 20
+            width = dot_btn[0] - search_x
+            height = (dot_btn[1] - search_y) - 300
 
             if category == "Student":
-                validate_students(x, y, width, height, search_bar, input_file, output_file)
+                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file)
 
             elif category == "Leader":
-                validate_leaders(x, y, width, height, search_bar, input_file, output_file)
+                validate_leaders(search_x, search_y, width, height, search_bar, input_file, output_file)
 
     else:
         return None
@@ -123,7 +123,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
     for r in range(0, len(output_df.iloc[:, 1:2])):
         for c in output_df.iloc[r, 1:2]:
             if output_df.iat[r, 2] == "NA" or output_df.iat[r, 2] == "ABSENT":
-                students.add(c)
+                students.add(c.lower())
 
     for name in students:
         print(name)
@@ -134,15 +134,18 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
         
         #FIX COORDINATES FOR SS
         if meeting_label is not None:
-            capture.waiting_ss(x, y, width, (meeting_label[1] - 5), "meeting")
-            wait_x, wait_y, wait_w, wait_h = x, y, width, (meeting_label[1] - 5)
+            capture.waiting_ss(x, y, width, height, "meeting")
+            wait_x, wait_y, wait_w, wait_h = x, y, width, height
+
+            # capture.waiting_ss(x, y, width, (meeting_label[1] - 5), "meeting")
+            # wait_x, wait_y, wait_w, wait_h = x, y, width, (meeting_label[1] - 5)
             wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)
             
-            present_student = wait_name.intersection(students)
+            present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
             
-            record_student(x, y, present_student, absent_students, wait_list, output_file)
+            record_student(x, y, present_students, absent_students, wait_list, output_file)
             search()
 
 def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
@@ -184,7 +187,8 @@ def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
         if meeting_label is not None:
-            capture.waiting_ss(x, y, width, (meeting_label[1] - 5) - height, "meeting")
+            capture.waiting_ss(x, y, width, (meeting_label[1] - 5), "meeting")
+            wait_x, wait_y, wait_w, wait_h = x, y, width, (meeting_label[1] - 5)
             wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)   
             
@@ -235,11 +239,11 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file):
             if output_df.iat[r, 2] == "PRESENT":
                 continue
             else:
-                if c in present_set:
-                    admit_student(x, y, c, wait_list)
+                if c.lower() in present_set:
+                    admit_student(x, y, c.lower(), wait_list)
                     output_df.iat[r, 2] = "PRESENT"
 
-                if c in absent_set:
+                if c.lower() in absent_set:
                     output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
@@ -266,6 +270,7 @@ def admit_student(x, y, student, wait_list):
     """
 
     match = None
+    
     for person in wait_list:
         if person['Text'] == student:
             print("FOUND!!")

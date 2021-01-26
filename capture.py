@@ -18,7 +18,7 @@ def waiting_ss(xpos, ypos, width, height, img_folder):
         mss.tools.to_png(area_img.rgb, area_img.size, output="images/" + img_folder + "/waiting_list.png")
 
 
-def find_img_coordinates(img_name, img_folder, save=False):
+def find_img_coordinates(img_name, img_folder):
     with mss.mss() as sct:
         needle = os.path.abspath("images/" + img_folder + '/' + img_name)
         haystack = np.array(sct.grab(sct.monitors[1]).pixels, dtype=np.uint8)
@@ -32,7 +32,7 @@ def find_img_coordinates(img_name, img_folder, save=False):
         return None
 
 
-def get_text_coordinates(img_name, img_folder, save=False):
+def get_text_coordinates(img_name, img_folder):
     img = cv2.imread("images/" + img_folder + '/' + img_name)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     d = pytesseract.image_to_data(gray, output_type=Output.DICT)
@@ -57,9 +57,9 @@ def get_text_coordinates(img_name, img_folder, save=False):
                         continue
                     else:
                         coordinates = {'x': x, 'y': y}
-                        text_coords.append({'Text': text, 'Coordinates': coordinates})
+                        text_coords.append({'Text': text.lower(), 'Coordinates': coordinates})
 
-                    # DEBUG DETECTION
+                    # CV2
                     # cv2.rectangle(gray,
                     #     (x, y),
                     #     (x + w + w2 + 10, y + h),
