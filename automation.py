@@ -85,6 +85,9 @@ def attendance(input_file, output_file, category):
         return None
 
 wait_x, wait_y, wait_w, wait_h = 0, 0, 0, 0
+
+absent_students = set()
+
 def validate_students(x, y, width, height, search_bar, input_file, output_file):
     """Verifies participant names through a dataframe before admission.
 
@@ -99,7 +102,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
     The absent student is identified if the name in the student roster
     cannot be extracted from the captured region.
 
-    After this process, the present_student set and absent_students set are passed into
+    After this process, the present_students set and absent_students set are passed into
     the record_student() function to be recorded into the dataframe (attendance sheet).
     
     Args:
@@ -117,12 +120,19 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
     
     students = set()
 
-    output_df = pd.read_csv(output_file)
-    output_df.fillna("NA", inplace=True)
+    out_df = pd.read_csv(output_file)
+    
+    # ADD CURRENT DATE
+    # FILTER OUT PRESENT STUDENTS, ITERATE THROUGH ABSENT STUDENTS AFTER FIRST CLICK
+    # if not out_df.isnull(df['C'].iloc[0]):
+        
+    out_df.fillna("NA", inplace=True)
+    out_df.iat[0, 2] = pd.to_datetime('today').date().strftime('%m/%d/%Y')
+    print(out_df.iat[0,2])
 
-    for r in range(0, len(output_df.iloc[:, 1:2])):
-        for c in output_df.iloc[r, 1:2]:
-            if output_df.iat[r, 2] == "NA" or output_df.iat[r, 2] == "ABSENT":
+    for r in range(0, len(out_df.iloc[:, 1:2])):
+        for c in out_df.iloc[r, 1:2]:
+            if out_df.iat[r, 2] == "NA" or out_df.iat[r, 2] == "ABSENT":
                 students.add(c.lower())
 
     for name in students:
@@ -132,13 +142,10 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
-        #FIX COORDINATES FOR SS
         if meeting_label is not None:
             capture.waiting_ss(x, y, width, height, "meeting")
             wait_x, wait_y, wait_w, wait_h = x, y, width, height
 
-            # capture.waiting_ss(x, y, width, (meeting_label[1] - 5), "meeting")
-            # wait_x, wait_y, wait_w, wait_h = x, y, width, (meeting_label[1] - 5)
             wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)
             
