@@ -5,7 +5,6 @@ import time
 
 from tkinter import filedialog
 
-
 def setup_df(input_file, output_file):
     """Prepares a default dataframe for an attendance sheet.
 
@@ -23,7 +22,7 @@ def setup_df(input_file, output_file):
     
     student_df = pd.read_csv(input_file)
     student_df.fillna('NA', inplace=True)
-    student = {'Student ID': [], 'Name': [], 'Status': [], 'Time': []}
+    student = {'Student ID': [], 'Name': [], 'Status': [], 'Time': [], 'Date': []}
     
     students = []
     for r in range(0, len(student_df.iloc[:, 1:])):
@@ -38,12 +37,12 @@ def setup_df(input_file, output_file):
         student['Name'].append(info[1] + ' ' + info[0])
         student['Status'].append("NA")
         student['Time'].append("NA")
+        student['Date'].append(pd.to_datetime('today').date().strftime('%m/%d/%Y'))
 
     output_df = pd.DataFrame(student)
     output_df.to_csv(output_file, index=False)
 
-# FIGURE OUT HOW TO OMIT STUDENTS THAT WERE ADMITTED TO REDUCE SEARCH TIME
-# MAYBE CONNECT APP TO A DATABASE
+prep = False
 def attendance(input_file, output_file, category):
     """Checks if the student or leader attendance button is pressed.
 
@@ -76,10 +75,10 @@ def attendance(input_file, output_file, category):
             height = (dot_btn[1] - search_y) - 300
 
             if category == "Student":
-                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file)
+                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, prep)
 
             elif category == "Leader":
-                validate_leaders(search_x, search_y, width, height, search_bar, input_file, output_file)
+                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, prep, leader=True)
 
     else:
         return None
@@ -87,8 +86,7 @@ def attendance(input_file, output_file, category):
 wait_x, wait_y, wait_w, wait_h = 0, 0, 0, 0
 
 absent_students = set()
-
-def validate_students(x, y, width, height, search_bar, input_file, output_file):
+def validate_students(x, y, width, height, search_bar, input_file, output_file, prep, leader=False):
     """Verifies participant names through a dataframe before admission.
 
     This function types the name of each group leader, found in the student roster, into 
@@ -121,20 +119,26 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
     students = set()
 
     out_df = pd.read_csv(output_file)
-    
-    # ADD CURRENT DATE
-    # FILTER OUT PRESENT STUDENTS, ITERATE THROUGH ABSENT STUDENTS AFTER FIRST CLICK
-    # if not out_df.isnull(df['C'].iloc[0]):
-        
     out_df.fillna("NA", inplace=True)
-    out_df.iat[0, 2] = pd.to_datetime('today').date().strftime('%m/%d/%Y')
-    print(out_df.iat[0,2])
 
-    for r in range(0, len(out_df.iloc[:, 1:2])):
-        for c in out_df.iloc[r, 1:2]:
-            if out_df.iat[r, 2] == "NA" or out_df.iat[r, 2] == "ABSENT":
-                students.add(c.lower())
+    # if leader == True:
+    #     for r in out_df.iloc[:, 1]:
+    #         for c in out_df.iloc[r, 1:2]:
+    #             if out_df.iat[r, 2] == "ABSENT":
+    #                 students.add(c.lower())
+    #                 print(c)
 
+    if prep == True:
+        for r in range(0, len(out_df.iloc[:, 1:2])):
+            for c in out_df.iloc[r, 1:2]:
+                if out_df.iat[r, 2] == "ABSENT":
+                    students.add(c.lower())
+    else:
+        for r in range(0, len(out_df.iloc[:, 1:2])):
+            for c in out_df.iloc[r, 1:2]:
+                if out_df.iat[r, 2] == "NA" or out_df.iat[r, 2] == "ABSENT":
+                    students.add(c.lower())
+    
     for name in students:
         print(name)
         pug.click(search_bar)
@@ -151,58 +155,9 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file):
             
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
+            print("ABSENT STUDENTS: " + str(absent_students))
             
             record_student(x, y, present_students, absent_students, wait_list, output_file)
-            search()
-
-def validate_leaders(x, y, width, height, search_bar, input_file, output_file):
-    """Verifies the names of group leaders through a dataframe before admission.
-
-    This function types the name of each group leader found in the student roster into 
-    the search bar and captures a precise region. 
-    Then, the name from the search result is extracted from the captured region, and it is put through
-    a set operation similar to the validate_students() function. After the status of the group leader
-    is determined, the present_leader set and absent_leaders set are passed into the write_to_csv()
-    function to be recorded into the dataframe (attendance sheet).
-    
-    Args:
-        x: The x-coordinate of the waiting-room label.
-        y: The y-coordinate of the waiting-room label.
-        width: The width of the captured region.
-        height: The height of the captured region.
-        search_bar: The coordinates of the search bar.
-        input_file: The student roster.
-        output_file: The attendance sheet.
-
-    Return:
-        None
-    """
-
-    leaders = set()
-
-    input_df = pd.read_csv(input_file)
-    for r in input_df.iloc[:, 1]:
-        info = r.replace(',', '').split(' ')
-        name = info[1] + ' ' + info[0]
-        leaders.add(name)
-
-    for name in leaders:
-        print(name)
-        pug.click(search_bar)
-        pug.typewrite(name)
-
-        meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
-        
-        if meeting_label is not None:
-            capture.waiting_ss(x, y, width, (meeting_label[1] - 5), "meeting")
-            wait_x, wait_y, wait_w, wait_h = x, y, width, (meeting_label[1] - 5)
-            wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
-            wait_name = set(student['Text'].replace('‘','') for student in wait_list)   
-            
-            present_leader = wait_name.intersection(leaders)
-            absent_leaders = leaders.difference(wait_name)
-            
-            record_student(x, y, present_leader, absent_leaders, wait_list, output_file)
             search()
 
 
@@ -256,6 +211,7 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file):
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
     
     output_df.to_csv(output_file, index=False)
+    prep = True
 
 
 def admit_student(x, y, student, wait_list):
