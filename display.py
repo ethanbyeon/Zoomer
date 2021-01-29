@@ -103,7 +103,7 @@ class Display(tk.Frame):
 
         self.student_btn.bind('<Leave>', self.student_leave)
         self.leaders_btn.bind('<Leave>', self.leaders_leave)
-    
+
     # HOVER METHODS
     def student_hover(self, e):
         self.student_btn['bg'] = COLOR['mango']

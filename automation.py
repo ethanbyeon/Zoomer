@@ -42,6 +42,7 @@ def setup_df(input_file, output_file):
     output_df = pd.DataFrame(student)
     output_df.to_csv(output_file, index=False)
 
+
 prep = False
 def attendance(input_file, output_file, category):
     """Checks if the student or leader attendance button is pressed.
@@ -83,6 +84,7 @@ def attendance(input_file, output_file, category):
     else:
         return None
 
+
 wait_x, wait_y, wait_w, wait_h = 0, 0, 0, 0
 
 absent_students = set()
@@ -116,29 +118,51 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
         None
     """
     
+    global absent_students
     students = set()
 
     out_df = pd.read_csv(output_file)
     out_df.fillna("NA", inplace=True)
 
-    # if leader == True:
-    #     for r in out_df.iloc[:, 1]:
-    #         for c in out_df.iloc[r, 1:2]:
-    #             if out_df.iat[r, 2] == "ABSENT":
-    #                 students.add(c.lower())
-    #                 print(c)
+    if leader == True:
+        in_df = pd.read_csv(input_file)
+        print("PREP: " + str(prep))
+        if prep == True:
+            for r in range(len(in_df.iloc[:, 1])):
+                info = ((in_df.iloc[r, 1]).lower()).replace(',', '').split(' ')
+                name = (info[1] + ' ' + info[0]).lower()
 
-    if prep == True:
-        for r in range(0, len(out_df.iloc[:, 1:2])):
-            for c in out_df.iloc[r, 1:2]:
+                print((out_df.iat[r, 1]).lower() + " " + name)
+                
+                # NEED TO MATCH IN_DF INDEX WITH OUT_DF SOMEHOW
                 if out_df.iat[r, 2] == "ABSENT":
-                    students.add(c.lower())
+                    students.add(name)
+                    print("LABS")
+                else:
+                    continue
+        else:
+            for r in range(len(in_df.iloc[:, 1])):
+                if out_df.iat[r, 2] == "NA":
+                    info = ((in_df.iloc[r, 1]).lower()).replace(',', '').split(' ')
+                    name = (info[1] + ' ' + info[0]).lower()
+                    students.add(name)
+                    print("LNA")
     else:
-        for r in range(0, len(out_df.iloc[:, 1:2])):
-            for c in out_df.iloc[r, 1:2]:
-                if out_df.iat[r, 2] == "NA" or out_df.iat[r, 2] == "ABSENT":
-                    students.add(c.lower())
+        print("PREP: " + str(prep))
+        if prep == True:
+            for r in range(0, len(out_df.iloc[:, 1:2])):
+                for c in out_df.iloc[r, 1:2]:
+                    if out_df.iat[r, 2] == "ABSENT":
+                        students.add(c.lower())
+                        print("ABS")
+        else:
+            for r in range(0, len(out_df.iloc[:, 1:2])):
+                for c in out_df.iloc[r, 1:2]:
+                    if out_df.iat[r, 2] == "NA":
+                        students.add(c.lower())
+                        print("NA")
     
+    print(students)
     for name in students:
         print(name)
         pug.click(search_bar)
@@ -211,6 +235,8 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file):
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
     
     output_df.to_csv(output_file, index=False)
+
+    global prep
     prep = True
 
 
