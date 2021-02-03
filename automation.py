@@ -124,32 +124,27 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
     out_df = pd.read_csv(output_file)
     out_df.fillna("NA", inplace=True)
 
-    if leader == True:
+    if leader:
         in_df = pd.read_csv(input_file)
-        print("PREP: " + str(prep))
-        if prep == True:
+        
+        if prep:
             for r in range(len(in_df.iloc[:, 1])):
-                info = ((in_df.iloc[r, 1]).lower()).replace(',', '').split(' ')
-                name = (info[1] + ' ' + info[0]).lower()
+                info = (in_df.iloc[r, 1]).replace(',', '').split(' ')
+                name = (info[1] + ' ' + info[0])
 
-                print((out_df.iat[r, 1]).lower() + " " + name)
-                
-                # NEED TO MATCH IN_DF INDEX WITH OUT_DF SOMEHOW
-                if out_df.iat[r, 2] == "ABSENT":
+                pos = out_df.loc[out_df['Name'] == name].index[0]
+                if out_df.iat[pos, 2] == "ABSENT":
                     students.add(name)
-                    print("LABS")
                 else:
                     continue
         else:
             for r in range(len(in_df.iloc[:, 1])):
                 if out_df.iat[r, 2] == "NA":
                     info = ((in_df.iloc[r, 1]).lower()).replace(',', '').split(' ')
-                    name = (info[1] + ' ' + info[0]).lower()
+                    name = (info[1] + ' ' + info[0])
                     students.add(name)
-                    print("LNA")
     else:
-        print("PREP: " + str(prep))
-        if prep == True:
+        if prep:
             for r in range(0, len(out_df.iloc[:, 1:2])):
                 for c in out_df.iloc[r, 1:2]:
                     if out_df.iat[r, 2] == "ABSENT":
@@ -160,9 +155,9 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
                 for c in out_df.iloc[r, 1:2]:
                     if out_df.iat[r, 2] == "NA":
                         students.add(c.lower())
-                        print("NA")
+                        print("ANA")
     
-    print(students)
+    print("LOOP: " + str(students))
     for name in students:
         print(name)
         pug.click(search_bar)
