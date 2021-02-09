@@ -43,7 +43,6 @@ def setup_df(input_file, output_file):
     output_df.to_csv(output_file, index=False)
 
 
-prep = False
 def attendance(input_file, output_file, category):
     """Checks if the student or leader attendance button is pressed.
 
@@ -76,10 +75,10 @@ def attendance(input_file, output_file, category):
             height = (dot_btn[1] - search_y) - 300
 
             if category == "Student":
-                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, prep)
+                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file)
 
             elif category == "Leader":
-                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, prep, leader=True)
+                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, leader=True)
 
     else:
         return None
@@ -87,8 +86,9 @@ def attendance(input_file, output_file, category):
 
 wait_x, wait_y, wait_w, wait_h = 0, 0, 0, 0
 
+leader_prep, student_prep = False, False
 absent_students = set()
-def validate_students(x, y, width, height, search_bar, input_file, output_file, prep, leader=False):
+def validate_students(x, y, width, height, search_bar, input_file, output_file, leader=False):
     """Verifies participant names through a dataframe before admission.
 
     This function types the name of each group leader, found in the student roster, into 
@@ -127,37 +127,32 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
     if leader:
         in_df = pd.read_csv(input_file)
         
-        if prep:
-            for r in range(len(in_df.iloc[:, 1])):
-                info = (in_df.iloc[r, 1]).replace(',', '').split(' ')
-                name = (info[1] + ' ' + info[0])
+        for r in range(len(in_df.iloc[:, 1])):
+            info = (in_df.iloc[r, 1]).replace(',', '').split(' ')
+            name = (info[1] + ' ' + info[0])
+            print("DB NAME: " + name)
 
+            if leader_prep:
                 pos = out_df.loc[out_df['Name'] == name].index[0]
                 if out_df.iat[pos, 2] == "ABSENT":
-                    students.add(name)
+                    students.add(name.lower())
+                    print("DB ABSENT PREP: " + str(students))
                 else:
                     continue
-        else:
-            for r in range(len(in_df.iloc[:, 1])):
-                if out_df.iat[r, 2] == "NA":
-                    info = ((in_df.iloc[r, 1]).lower()).replace(',', '').split(' ')
-                    name = (info[1] + ' ' + info[0])
-                    students.add(name)
+            else:
+                students.add(name.lower())
     else:
-        if prep:
-            for r in range(0, len(out_df.iloc[:, 1:2])):
-                for c in out_df.iloc[r, 1:2]:
+        for r in range(0, len(out_df.iloc[:, 1:2])):
+            for c in out_df.iloc[r, 1:2]:
+                if student_prep:
+                    print("STUDENT PREP: " + student_prep)
                     if out_df.iat[r, 2] == "ABSENT":
                         students.add(c.lower())
-                        print("ABS")
-        else:
-            for r in range(0, len(out_df.iloc[:, 1:2])):
-                for c in out_df.iloc[r, 1:2]:
-                    if out_df.iat[r, 2] == "NA":
-                        students.add(c.lower())
-                        print("ANA")
+                else:
+                    print("NA STUDENT SLOT: " + str(out_df.iat[r, 2]))
+                    students.add(c.lower())
     
-    print("LOOP: " + str(students))
+    #FIX CAPILIZATION FOR PREP = TRUE and fix absent_student sets after pressing leaders btn and reg#
     for name in students:
         print(name)
         pug.click(search_bar)
@@ -231,8 +226,8 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file):
     
     output_df.to_csv(output_file, index=False)
 
-    global prep
-    prep = True
+    global student_prep
+    student_prep = True
 
 
 def admit_student(x, y, student, wait_list):
