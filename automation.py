@@ -1,5 +1,6 @@
-import capture
+import mss
 import time
+import capture
 import numpy as np
 import pandas as pd
 import pyautogui as pug
@@ -96,10 +97,11 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
 
         if meeting_label is not None:
-            wait_list = capture.get_text_coordinates(np.array(sct.grab({'top': int(ypos),
-                                                                        'left': int(xpos),
-                                                                        'width': int(width),
-                                                                        'height': int(height)})))
+            with mss.mss() as sct:
+                wait_list = capture.get_text_coordinates(np.array(sct.grab({'top': int(ypos),
+                                                                            'left': int(xpos),
+                                                                            'width': int(width),
+                                                                            'height': int(height)})))
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)
 
             present_students = wait_name.intersection(students)
