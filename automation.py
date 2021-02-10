@@ -98,8 +98,8 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
 
         if meeting_label is not None:
             with mss.mss() as sct:
-                wait_list = capture.get_text_coordinates(np.array(sct.grab({'top': int(ypos),
-                                                                            'left': int(xpos),
+                wait_list = capture.get_text_coordinates(np.array(sct.grab({'top': int(y),
+                                                                            'left': int(x),
                                                                             'width': int(width),
                                                                             'height': int(height)})))
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)
