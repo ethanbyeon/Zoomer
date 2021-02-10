@@ -10,13 +10,6 @@ from PIL import Image
 from pytesseract import Output
 
 # pytesseract.pytesseract.tesseract_cmd = 'Tesseract-OCR\\tesseract.exe'
-def waiting_ss(xpos, ypos, width, height, img_folder):
-    with mss.mss() as sct:
-        area = {'top': int(ypos), 'left': int(xpos), 'width': int(width), 'height': int(height)}
-
-        area_img = sct.grab(area)
-        mss.tools.to_png(area_img.rgb, area_img.size, output="images/" + img_folder + "/waiting_list.png")
-
 
 def find_img_coordinates(img_name, img_folder):
     with mss.mss() as sct:
