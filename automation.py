@@ -1,7 +1,8 @@
+import time
 import capture
+import numpy as np
 import pandas as pd
 import pyautogui as pug
-import time
 
 from tkinter import filedialog
 
@@ -9,13 +10,13 @@ def setup_df(input_file, output_file):
     student_df = pd.read_csv(input_file)
     student_df.fillna('NA', inplace=True)
     student = {'Student ID': [], 'Name': [], 'Status': [], 'Time': [], 'Date': []}
-    
+
     students = []
     for r in range(0, len(student_df.iloc[:, 1:])):
         for c in student_df.iloc[r, 1:]:
             if c != "NA":
                 students.append(c)
-    
+
     for s in sorted(students):
         info = s.replace(',', '').split(' ')
 
@@ -31,9 +32,9 @@ def setup_df(input_file, output_file):
 
 def attendance(input_file, output_file, category):
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
-    
+
     if dot_btn is not None:
-        
+
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
 
         if search_bar is not None:
@@ -62,7 +63,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
 
     if leader:
         in_df = pd.read_csv(input_file)
-        
+
         for r in range(len(in_df.iloc[:, 1])):
             info = (in_df.iloc[r, 1]).replace(',', '').split(' ')
             name = info[1] + ' ' + info[0]
@@ -86,24 +87,22 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
                         continue
                     else:
                         students.add(c.lower())
-    
+
     for name in students:
         print(name)
         pug.click(search_bar)
         pug.typewrite(name)
 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
-        
-        if meeting_label is not None:
-            capture.waiting_ss(x, y, width, height, "meeting")
 
-            wait_list = capture.get_text_coordinates("waiting_list.png", "meeting")
+        if meeting_label is not None:
+            wait_list = capture.get_text_coordinates(x, y, width, height)
             wait_name = set(student['Text'].replace('‘','') for student in wait_list)
-            
+
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
             print("SIZE: " + str(len(absent_students)))
-            
+
             record_student(x, y, present_students, absent_students, wait_list, output_file, leader)
             search()
 
@@ -132,7 +131,7 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
                     output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
-    
+
     output_df.to_csv(output_file, index=False)
 
     global student_prep, leader_prep
@@ -144,7 +143,7 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
 
 def admit_student(x, y, student, wait_list):
     match = None
-    
+
     for person in wait_list:
         if person['Text'] == student:
             print("FOUND: " + student)
@@ -152,6 +151,4 @@ def admit_student(x, y, student, wait_list):
 
     if match is not None:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
-        capture.waiting_ss(wait_x, wait_y, wait_w, wait_h, "meeting")
         pug.click(pug.locateOnScreen('images/meeting/admit_btn.png', grayscale=True))
-              
