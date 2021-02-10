@@ -96,7 +96,8 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
 
         if meeting_label is not None:
-            wait_name = set(student['Text'].replace('‘','') for student in capture.get_text_coordinates(x, y, width, height))
+            wait_list = capture.get_text_coordinates(x, y, width, height)
+            wait_name = set(student['Text'].replace('‘','') for student in wait_list)
 
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
