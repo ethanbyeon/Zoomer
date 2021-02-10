@@ -1,4 +1,3 @@
-import mss
 import time
 import capture
 import numpy as np
@@ -97,12 +96,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
         meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
 
         if meeting_label is not None:
-            with mss.mss() as sct:
-                wait_list = capture.get_text_coordinates(np.array(sct.grab({'top': int(y),
-                                                                            'left': int(x),
-                                                                            'width': int(width),
-                                                                            'height': int(height)})))
-            wait_name = set(student['Text'].replace('‘','') for student in wait_list)
+            wait_name = set(student['Text'].replace('‘','') for student in capture.get_text_coordinates(x, y, width, height))
 
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)

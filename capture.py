@@ -25,10 +25,12 @@ def find_img_coordinates(img_name, img_folder):
         return None
 
 
-def get_text_coordinates(img_as_np: np.ndarray):
-    if not isinstance(img_as_np, np.ndarray):
-        raise TypeError(f"get_text_coordinates() argument must be a numpy.ndarray, not {type(img_as_np).__name__!r}")
-    gray = cv2.cvtColor(img_as_np, cv2.COLOR_BGR2GRAY)
+def get_text_coordinates(x, y, width, height):
+    with mss.mss() as sct:
+        gray = cv2.cvtColor(np.array(sct.grab({'top': int(y),
+                                               'left': int(x),
+                                               'width': int(width),
+                                               'height': int(height)})), cv2.COLOR_BGR2GRAY)
     d = pytesseract.image_to_data(gray, output_type=Output.DICT)
 
     text_coords = []
