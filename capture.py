@@ -1,10 +1,10 @@
-import cv2
+import re
 import os
+import cv2
+import numpy as np
+import pytesseract
 import mss, mss.tools
 import pyautogui as pug
-import pytesseract
-import numpy as np
-import re
 
 from PIL import Image
 from pytesseract import Output
@@ -13,7 +13,7 @@ from pytesseract import Output
 def waiting_ss(xpos, ypos, width, height, img_folder):
     with mss.mss() as sct:
         area = {'top': int(ypos), 'left': int(xpos), 'width': int(width), 'height': int(height)}
-        
+
         area_img = sct.grab(area)
         mss.tools.to_png(area_img.rgb, area_img.size, output="images/" + img_folder + "/waiting_list.png")
 
@@ -32,9 +32,10 @@ def find_img_coordinates(img_name, img_folder):
         return None
 
 
-def get_text_coordinates(img_name, img_folder):
-    img = cv2.imread("images/" + img_folder + '/' + img_name)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+def get_text_coordinates(img_as_np: np.ndarray):
+    if not isinstance(img_as_np, np.ndarray):
+        raise TypeError(f"get_text_coordinates() argument must be a numpy.ndarray, not {type(img_as_np).__name__!r}")
+    gray = cv2.cvtColor(img_as_np, cv2.COLOR_BGR2GRAY)
     d = pytesseract.image_to_data(gray, output_type=Output.DICT)
 
     text_coords = []
@@ -65,5 +66,5 @@ def get_text_coordinates(img_name, img_folder):
                     #     (x + w + w2 + 10, y + h),
                     #     (0, 0, 255), 2)
                     # cv2.imshow('Output', gray)
-                    
+
     return text_coords
