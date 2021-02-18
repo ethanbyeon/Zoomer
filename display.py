@@ -5,23 +5,21 @@ import automation
 from tkinter import filedialog
 
 
-WIN_W = 370
+WIN_W = 200
 WIN_H = 300
 
 BTN_W = 20
-BTN_H = 2
 
 FONT = ('arial', 10, 'bold')
 FILES = {'Input': '', 'Output': ''}
 
 COLOR = {
     'danger': '#F04D43',
-    'grey': '#CED4DA',
-    'light-grey': '#E9ECEF',
     'mango': '#FB9927',
-    'mint': '#5BBD93',
     'success': '#A3DE83',
-    'white': '#F8F9FA',
+    'ash': '#B3BFB8',
+    'mint': '#A2E3C4',
+    'white': '#F0F7F4',
 }
 
 # MESSAGE
@@ -37,12 +35,12 @@ class Display(tk.Frame):
     @classmethod
     def main(cls):
         root = tk.Tk()
-        root.title("Neato Zoom Automation")
+        root.title("NZA")
         root.iconbitmap('images/check.ico')
-        root.configure(bg=COLOR['grey'])
+        root.configure(bg=COLOR['ash'])
         root.geometry(f'{WIN_W}x{WIN_H}')
 
-        frame = cls(root, bg=COLOR['grey'])
+        frame = cls(root, bg=COLOR['ash'])
         frame.grid()
         root.mainloop()
 
@@ -50,44 +48,32 @@ class Display(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        # FILES LABEL
-        self.f_in_label = tk.Label(self, text="Roster: EMPTY", font=FONT)
-        self.f_out_label = tk.Label(self, text="Results: EMPTY", font=FONT)
-
         # FILE BUTTONS
-        self.f_in_btn = tk.Button(self, text="Student Roster", font=FONT, 
-            height=BTN_H, width=BTN_W, borderwidth=0, 
+        self.f_in_btn = tk.Button(self, text="Class Roster", font=FONT, 
+            height=3, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white', 
-            command=lambda: addFile("Input", self.f_in_label, self.f_in_btn, self.f_out_btn))
+            command=lambda: addFile("Input", self.f_in_btn, self.f_out_btn))
         self.f_out_btn = tk.Button(self, text="Attendance Sheet", font=FONT, 
-            height=BTN_H, width=BTN_W, borderwidth=0, 
+            height=3, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white',
-            command=lambda: addFile("Output", self.f_out_label, self.f_in_btn, self.f_out_btn))
+            command=lambda: addFile("Output", self.f_in_btn, self.f_out_btn))
 
         # AUTOMATION BUTTONS
         self.student_btn = tk.Button(self, text="Take Attendance", font=FONT, 
-            height=BTN_H, width=BTN_W, borderwidth=0, 
+            height=2, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['mint'], activebackground=COLOR['mango'], activeforeground='white', 
-            command=lambda: attendance("Student", self.f_in_label, self.f_out_label))
+            command=lambda: attendance("Student"))
         self.leaders_btn = tk.Button(self, text="Admit Group Leaders", font=FONT, 
-            height=BTN_H, width=BTN_W, borderwidth=0, 
+            height=2, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['mint'], activebackground=COLOR['mango'], activeforeground='white', 
-            command=lambda: attendance("Leader", self.f_in_label, self.f_out_label))
-
-        # HELP LABEL
-        self.tip_label = tk.Label(self, text=tip_msg, font=FONT, bg=COLOR['grey'])
+            command=lambda: attendance("Leader"))
         
         # GRID
-        self.f_in_label.grid(row=1, column=0, padx=10, pady=(20,0), sticky='WENS')
-        self.f_out_label.grid(row=1, column=1, padx=10, pady=(20,0), sticky='WENS')
-
-        self.f_in_btn.grid(row=2, column=0, padx=10, pady=(0,10))
-        self.f_out_btn.grid(row=2, column=1, padx=10, pady=(0,10))
+        self.f_in_btn.grid(row=1, column=0, padx=17, pady=(40,10))
+        self.f_out_btn.grid(row=2, column=0, pady=(0,10))
         
-        self.student_btn.grid(row=3, column=0)
-        self.leaders_btn.grid(row=3, column=1)
-
-        self.tip_label.grid(row=5, column=0, pady=(5,0), columnspan=2)
+        self.student_btn.grid(row=3, column=0, pady=(0,10))
+        self.leaders_btn.grid(row=4, column=0)
         
         # BINDS
         self.student_btn.bind('<Enter>', self.student_hover)
@@ -108,7 +94,7 @@ class Display(tk.Frame):
         self.leaders_btn['bg'] = COLOR['mint']
 
 
-def addFile(file, label, in_btn, out_btn):
+def addFile(file, in_btn, out_btn):
     file_name = filedialog.askopenfilename(initialdir='/', title="Select A File", filetypes=(("csv files", '*.csv'),))
     
     if os.path.isfile(file_name):
@@ -116,17 +102,17 @@ def addFile(file, label, in_btn, out_btn):
         f = file_name.split('/')
         
         if file == "Input":
-            label.config(text=f[-1])
+            in_btn.config(text="Class Roster:\n" + f[-1])
             in_btn['bg'] = COLOR['success']
         else:
-            label.config(text=f[-1])
+            out_btn.config(text="Attendance Sheet:\n" + f[-1])
             out_btn['bg'] = COLOR['success']
 
     if FILES['Input'] != '' and FILES['Output'] != '':
         automation.setup_df(FILES['Input'], FILES['Output'])
 
 
-def attendance(student_type, f_in_label, f_out_label):
+def attendance(student_type):
     if FILES['Input'] != '' and FILES['Output'] != '':
         automation.attendance(FILES['Input'], FILES['Output'], student_type)
 
