@@ -50,8 +50,6 @@ def attendance(input_file, output_file, category):
         return None
 
 
-wait_x, wait_y, wait_w, wait_h = 0, 0, 0, 0
-
 leader_prep, student_prep = False, False
 absent_students = set()
 def validate_students(x, y, width, height, search_bar, input_file, output_file, leader=False):

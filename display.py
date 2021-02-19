@@ -5,12 +5,12 @@ import automation
 from tkinter import filedialog
 
 
-WIN_W = 200
-WIN_H = 300
+WIN_W = 240
+WIN_H = 340
 
 BTN_W = 20
 
-FONT = ('arial', 10, 'bold')
+FONT = ('arial', 12, 'bold')
 FILES = {'Input': '', 'Output': ''}
 
 COLOR = {
@@ -28,7 +28,6 @@ tip_msg = ("\n"
             "\nDon't have tabs overlap the Zoom App"
             "\nPlease do not move the cursor after pressing a button."
         )
-
 
 class Display(tk.Frame):
 
@@ -49,21 +48,21 @@ class Display(tk.Frame):
         super().__init__(master, cnf, **kw)
 
         # FILE BUTTONS
-        self.f_in_btn = tk.Button(self, text="Class Roster", font=FONT, 
+        self.f_in_btn = tk.Button(self, text="CLASS ROSTER", font=FONT, 
             height=3, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white', 
             command=lambda: addFile("Input", self.f_in_btn, self.f_out_btn))
-        self.f_out_btn = tk.Button(self, text="Attendance Sheet", font=FONT, 
+        self.f_out_btn = tk.Button(self, text="ATTENDANCE SHEET", font=FONT, 
             height=3, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white',
             command=lambda: addFile("Output", self.f_in_btn, self.f_out_btn))
 
         # AUTOMATION BUTTONS
-        self.student_btn = tk.Button(self, text="Take Attendance", font=FONT, 
+        self.student_btn = tk.Button(self, text="ADMIT STUDENTS", font=FONT, 
             height=2, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['mint'], activebackground=COLOR['mango'], activeforeground='white', 
             command=lambda: attendance("Student"))
-        self.leaders_btn = tk.Button(self, text="Admit Group Leaders", font=FONT, 
+        self.leaders_btn = tk.Button(self, text="ADMIT LEADERS", font=FONT, 
             height=2, width=BTN_W, borderwidth=0, 
             fg="white", bg=COLOR['mint'], activebackground=COLOR['mango'], activeforeground='white', 
             command=lambda: attendance("Leader"))
@@ -102,10 +101,10 @@ def addFile(file, in_btn, out_btn):
         f = file_name.split('/')
         
         if file == "Input":
-            in_btn.config(text="Class Roster:\n" + f[-1])
+            in_btn.config(text="CLASS ROSTER:\n" + f[-1])
             in_btn['bg'] = COLOR['success']
         else:
-            out_btn.config(text="Attendance Sheet:\n" + f[-1])
+            out_btn.config(text="ATTENDANCE SHEET:\n" + f[-1])
             out_btn['bg'] = COLOR['success']
 
     if FILES['Input'] != '' and FILES['Output'] != '':
