@@ -20,8 +20,13 @@ def setup_df(input_file, output_file):
     for s in sorted(students):
         info = s.replace(',', '').split(' ')
 
-        student['Student ID'].append(info[2])
-        student['Name'].append(info[1] + ' ' + info[0])
+        if len(info) == 4:
+            student['Name'].append(info[0] + ', ' + info[1] + ' ' + info[2])
+            student['Student ID'].append(((info[3]).replace('(','')).replace(')',''))
+        elif len(info) == 3:
+            student['Name'].append(info[0] + ', ' + info[1])
+            student['Student ID'].append(((info[2]).replace('(','')).replace(')',''))
+
         student['Status'].append("NA")
         student['Time'].append("NA")
         student['Date'].append(pd.to_datetime('today').date().strftime('%m/%d/%Y'))

@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 
 WIN_W = 240
-WIN_H = 340
+WIN_H = 335
 
 BTN_W = 20
 
@@ -14,12 +14,14 @@ FONT = ('arial', 12, 'bold')
 FILES = {'Input': '', 'Output': ''}
 
 COLOR = {
-    'danger': '#F04D43',
-    'mango': '#FB9927',
-    'success': '#A3DE83',
+    'kombu': '#3C493F',
+    'xanadu': '#7E8D85',
     'ash': '#B3BFB8',
     'mint': '#A2E3C4',
     'white': '#F0F7F4',
+    'danger': '#F04D43',
+    'mango': '#FB9927',
+    'success': '#A3DE83',
 }
 
 # MESSAGE
@@ -47,29 +49,82 @@ class Display(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
+        # FILE BORDERS
+        self.fin_border = tk.Button(self, 
+            text="BORDER 1", 
+            font=FONT, 
+            height=4, 
+            width=BTN_W, 
+            borderwidth=0, 
+            bg=COLOR['xanadu'],
+            fg=COLOR['kombu'],
+            activebackground=COLOR['xanadu'], 
+            activeforeground=COLOR['kombu'])
+        self.fout_border = tk.Button(self, 
+            text="BORDER 2", 
+            font=FONT, 
+            height=4, 
+            width=BTN_W, 
+            borderwidth=0, 
+            bg=COLOR['xanadu'],
+            fg=COLOR['kombu'],
+            activebackground=COLOR['xanadu'], 
+            activeforeground=COLOR['kombu'])
+
         # FILE BUTTONS
-        self.f_in_btn = tk.Button(self, text="CLASS ROSTER", font=FONT, 
-            height=3, width=BTN_W, borderwidth=0, 
-            fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white', 
-            command=lambda: addFile("Input", self.f_in_btn, self.f_out_btn))
-        self.f_out_btn = tk.Button(self, text="ATTENDANCE SHEET", font=FONT, 
-            height=3, width=BTN_W, borderwidth=0, 
-            fg="white", bg=COLOR['danger'], activebackground=COLOR['mango'], activeforeground='white',
-            command=lambda: addFile("Output", self.f_in_btn, self.f_out_btn))
+        self.fin_btn = tk.Button(self, 
+            text="CLASS ROSTER", 
+            font=FONT, 
+            height=3, 
+            width=BTN_W-1, 
+            borderwidth=0, 
+            fg=COLOR['kombu'], 
+            bg=COLOR['ash'], 
+            activebackground=COLOR['mint'], 
+            activeforeground=COLOR['white'], 
+            command=lambda: addFile("Input", self.fin_btn, self.fout_btn))
+        self.fout_btn = tk.Button(self, 
+            text="ATTENDANCE SHEET", 
+            font=FONT, 
+            height=3, 
+            width=BTN_W-1, 
+            borderwidth=0, 
+            fg=COLOR['kombu'], 
+            bg=COLOR['ash'],
+            activebackground=COLOR['mint'], 
+            activeforeground=COLOR['white'],
+            command=lambda: addFile("Output", self.fin_btn, self.fout_btn))
 
         # AUTOMATION BUTTONS
-        self.student_btn = tk.Button(self, text="ADMIT STUDENTS", font=FONT, 
-            height=2, width=BTN_W, borderwidth=0, 
-            fg="white", bg=COLOR['mint'], activebackground=COLOR['mango'], activeforeground='white', 
+        self.student_btn = tk.Button(self, 
+            text="ADMIT STUDENTS", 
+            font=FONT, 
+            height=2, 
+            width=BTN_W, 
+            borderwidth=0, 
+            fg="white", 
+            bg=COLOR['danger'], 
+            activebackground=COLOR['mango'], 
+            activeforeground='white', 
             command=lambda: attendance("Student"))
-        self.leaders_btn = tk.Button(self, text="ADMIT LEADERS", font=FONT, 
-            height=2, width=BTN_W, borderwidth=0, 
-            fg="white", bg=COLOR['mint'], activebackground=COLOR['mango'], activeforeground='white', 
+        self.leaders_btn = tk.Button(self, 
+            text="ADMIT LEADERS", 
+            font=FONT, 
+            height=2, 
+            width=BTN_W, 
+            borderwidth=0, 
+            fg="white", 
+            bg=COLOR['danger'], 
+            activebackground=COLOR['mango'], 
+            activeforeground='white', 
             command=lambda: attendance("Leader"))
         
         # GRID
-        self.f_in_btn.grid(row=1, column=0, padx=17, pady=(40,10))
-        self.f_out_btn.grid(row=2, column=0, pady=(0,10))
+        self.fin_border.grid(row=1, column=0, padx=17, pady=(20,10))
+        self.fout_border.grid(row=2, column=0, pady=(0,10))
+        
+        self.fin_btn.grid(row=1, column=0, padx=17, pady=(20,10))
+        self.fout_btn.grid(row=2, column=0, pady=(0,10))
         
         self.student_btn.grid(row=3, column=0, pady=(0,10))
         self.leaders_btn.grid(row=4, column=0)
@@ -88,9 +143,9 @@ class Display(tk.Frame):
         self.leaders_btn['bg'] = COLOR['mango']
 
     def student_leave(self, e):
-        self.student_btn['bg'] = COLOR['mint']
+        self.student_btn['bg'] = COLOR['danger']
     def leaders_leave(self, e):
-        self.leaders_btn['bg'] = COLOR['mint']
+        self.leaders_btn['bg'] = COLOR['danger']
 
 
 def addFile(file, in_btn, out_btn):
@@ -102,9 +157,11 @@ def addFile(file, in_btn, out_btn):
         
         if file == "Input":
             in_btn.config(text="CLASS ROSTER:\n" + f[-1])
+            in_btn['fg'] = COLOR['white']
             in_btn['bg'] = COLOR['success']
         else:
             out_btn.config(text="ATTENDANCE SHEET:\n" + f[-1])
+            out_btn['fg'] = COLOR['white']
             out_btn['bg'] = COLOR['success']
 
     if FILES['Input'] != '' and FILES['Output'] != '':
