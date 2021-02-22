@@ -8,9 +8,10 @@ from tkinter import filedialog
 
 def setup_df(input_file, output_file):
     student_df = pd.read_csv(input_file)
+
     student_df.fillna('NA', inplace=True)
     student = {'Student ID': [], 'Name': [], 'Status': [], 'Time': [], 'Date': []}
-
+    
     students = []
     for r in range(0, len(student_df.iloc[:, 1:])):
         for c in student_df.iloc[r, 1:]:
@@ -82,14 +83,17 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
     else:
         for r in range(0, len(out_df.iloc[:, 1:2])):
             for c in out_df.iloc[r, 1:2]:
+                info = c.replace(',', '').split(' ')
+                name = info[1] + ' ' + info[0]
+
                 if student_prep:
                     if out_df.iat[r, 2] == "ABSENT":
-                        students.add(c.lower())
+                        students.add(name.lower())
                 else:
                     if out_df.iat[r, 2] == "PRESENT":
                         continue
                     else:
-                        students.add(c.lower())
+                        students.add(name.lower())
 
     for name in students:
         print(name)
@@ -104,10 +108,11 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
 
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
-            print("SIZE: " + str(len(absent_students)))
 
             record_student(x, y, present_students, absent_students, wait_list, output_file, leader)
             search()
+
+    print("ABSENT ({0}) :".format(len(absent_students)), absent_students)
 
 
 def search():

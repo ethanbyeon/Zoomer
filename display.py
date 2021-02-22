@@ -4,7 +4,6 @@ import automation
 
 from tkinter import filedialog
 
-
 WIN_W = 240
 WIN_H = 335
 
@@ -23,13 +22,6 @@ COLOR = {
     'mango': '#FB9927',
     'success': '#A3DE83',
 }
-
-# MESSAGE
-tip_msg = ("\n"
-            "Tips: "
-            "\nDon't have tabs overlap the Zoom App"
-            "\nPlease do not move the cursor after pressing a button."
-        )
 
 class Display(tk.Frame):
 
@@ -82,7 +74,7 @@ class Display(tk.Frame):
             bg=COLOR['ash'], 
             activebackground=COLOR['mint'], 
             activeforeground=COLOR['white'], 
-            command=lambda: addFile("Input", self.fin_btn, self.fout_btn))
+            command=lambda: addFile(self.fin_btn, self.fin_border))
         self.fout_btn = tk.Button(self, 
             text="ATTENDANCE SHEET", 
             font=FONT, 
@@ -93,7 +85,7 @@ class Display(tk.Frame):
             bg=COLOR['ash'],
             activebackground=COLOR['mint'], 
             activeforeground=COLOR['white'],
-            command=lambda: addFile("Output", self.fin_btn, self.fout_btn))
+            command=lambda: saveFile(self.fout_btn, self.fout_border))
 
         # AUTOMATION BUTTONS
         self.student_btn = tk.Button(self, 
@@ -135,7 +127,7 @@ class Display(tk.Frame):
 
         self.student_btn.bind('<Leave>', self.student_leave)
         self.leaders_btn.bind('<Leave>', self.leaders_leave)
-
+    
     # HOVER METHODS
     def student_hover(self, e):
         self.student_btn['bg'] = COLOR['mango']
@@ -147,29 +139,38 @@ class Display(tk.Frame):
     def leaders_leave(self, e):
         self.leaders_btn['bg'] = COLOR['danger']
 
+def saveFile(out_btn, border):
+    export_path = filedialog.asksaveasfilename(defaultextension='.csv')
+    
+    FILES["Output"] = export_path
+    f = export_path.split('/')
 
-def addFile(file, in_btn, out_btn):
-    file_name = filedialog.askopenfilename(initialdir='/', title="Select A File", filetypes=(("csv files", '*.csv'),))
+    out_btn.config(text="ATTENDANCE SHEET:\n" + f[-1])
+    out_btn['fg'] = COLOR['white']
+    out_btn['bg'], border['bg'] = COLOR['success'], COLOR['success']
+
+    if FILES["Input"]:
+        extension = os.path.splitext(FILES["Input"])
+        if extension[1] == '.xlsx':
+            automation.setup_df(FILES["Input"], FILES["Output"])
+        else:
+            automation.setup_df(FILES["Input"], FILES["Output"])
+
+
+def addFile(in_btn, border):
+    file_name = filedialog.askopenfilename(initialdir='/Desktop', title="Select A File", filetypes=(("CSV FILE", "*.csv"),))
     
     if os.path.isfile(file_name):
-        FILES[file] = file_name
+        FILES["Input"] = file_name
         f = file_name.split('/')
         
-        if file == "Input":
-            in_btn.config(text="CLASS ROSTER:\n" + f[-1])
-            in_btn['fg'] = COLOR['white']
-            in_btn['bg'] = COLOR['success']
-        else:
-            out_btn.config(text="ATTENDANCE SHEET:\n" + f[-1])
-            out_btn['fg'] = COLOR['white']
-            out_btn['bg'] = COLOR['success']
-
-    if FILES['Input'] != '' and FILES['Output'] != '':
-        automation.setup_df(FILES['Input'], FILES['Output'])
+        in_btn.config(text="CLASS ROSTER:\n" + f[-1])
+        in_btn['fg'] = COLOR['white']
+        in_btn['bg'], border['bg'] = COLOR['success'], COLOR['success']
 
 
 def attendance(student_type):
-    if FILES['Input'] != '' and FILES['Output'] != '':
+    if FILES:
         automation.attendance(FILES['Input'], FILES['Output'], student_type)
 
            
