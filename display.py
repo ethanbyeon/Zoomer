@@ -149,11 +149,8 @@ def saveFile(out_btn, border):
     out_btn['fg'] = COLOR['white']
     out_btn['bg'], border['bg'] = COLOR['success'], COLOR['success']
 
-    if FILES["Input"]:
-        extension = os.path.splitext(FILES["Input"])
-        if extension[1] == '.xlsx':
-            automation.setup_df(FILES["Input"], FILES["Output"])
-        else:
+    if FILES["Input"] and FILES["Output"]:
+        if FILES["Input"] != FILES["Output"]:
             automation.setup_df(FILES["Input"], FILES["Output"])
 
 

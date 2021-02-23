@@ -19,14 +19,14 @@ def setup_df(input_file, output_file):
                 students.append(c)
 
     for s in sorted(students):
-        info = s.replace(',', '').split(' ')
+        info = (s.replace(',', '').replace('(', '').replace(')', '')).split(' ')
 
         if len(info) == 4:
-            student['Name'].append(info[0] + ', ' + info[1] + ' ' + info[2])
-            student['Student ID'].append(((info[3]).replace('(','')).replace(')',''))
+            student['Name'].append(f'{info[0]}, {info[1]} {info[2]}')
+            student['Student ID'].append(info[3])
         elif len(info) == 3:
-            student['Name'].append(info[0] + ', ' + info[1])
-            student['Student ID'].append(((info[2]).replace('(','')).replace(')',''))
+            student['Name'].append(f'{info[0]}, {info[1]}')
+            student['Student ID'].append(info[2])
 
         student['Status'].append("NA")
         student['Time'].append("NA")
@@ -57,9 +57,10 @@ def attendance(input_file, output_file, category):
 
 
 leader_prep, student_prep = False, False
-absent_students = set()
+present_students, absent_students = set(), set()
+
 def validate_students(x, y, width, height, search_bar, input_file, output_file, leader=False):
-    global absent_students
+    global present_students, absent_students
     students = set()
 
     out_df = pd.read_csv(output_file)
@@ -68,32 +69,40 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
     if leader:
         in_df = pd.read_csv(input_file)
 
+        print("ADMITTING LEADERS... ------------------")
         for r in range(len(in_df.iloc[:, 1])):
-            info = (in_df.iloc[r, 1]).replace(',', '').split(' ')
-            name = info[1] + ' ' + info[0]
+            info = ((in_df.iloc[r, 1]).replace(',', '').replace('(', '').replace(')', '')).split(' ')
+            
+            if len(info) == 4:
+                df_name = f'{info[0]}, {info[1]} {info[2]}'
+            elif len(info) == 3:
+                df_name = f'{info[0]}, {info[1]}'
+
+            name = f'{info[1]} {info[0]}'
 
             if leader_prep:
-                pos = out_df.loc[out_df['Name'] == name].index[0]
-                if out_df.iat[pos, 2] == "ABSENT":
-                    students.add(name.lower())
+                name_pos = out_df.loc[(df_name == out_df['Name'])].index[0]
+                if out_df.iat[name_pos, 2] == "ABSENT":
+                    students.add(name)
                 else:
                     continue
             else:
-                students.add(name.lower())
+                students.add(name)
     else:
+        print("ADMITTING STUDENTS... -----------------")
         for r in range(0, len(out_df.iloc[:, 1:2])):
             for c in out_df.iloc[r, 1:2]:
                 info = c.replace(',', '').split(' ')
-                name = info[1] + ' ' + info[0]
+                name = f'{info[1]} {info[0]}'
 
                 if student_prep:
                     if out_df.iat[r, 2] == "ABSENT":
-                        students.add(name.lower())
+                        students.add(name)
                 else:
                     if out_df.iat[r, 2] == "PRESENT":
                         continue
                     else:
-                        students.add(name.lower())
+                        students.add(name)
 
     for name in students:
         print(name)
@@ -111,8 +120,10 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
 
             record_student(x, y, present_students, absent_students, wait_list, output_file, leader)
             search()
-
-    print("ABSENT ({0}) :".format(len(absent_students)), absent_students)
+    
+    print('----------------RESULTS----------------')
+    print(f'ABSENT  ({len(absent_students)}):', absent_students)
+    print('---------------------------------------')
 
 
 def search():
@@ -128,14 +139,17 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
 
     for r in range(0, len(output_df.iloc[:, 1:2])):
         for c in output_df.iloc[r, 1:2]:
+            info = (c.replace(',','')).split(' ')
+            name = f'{info[1]} {info[0]}'
+
             if output_df.iat[r, 2] == "PRESENT":
                 continue
             else:
-                if c.lower() in present_set:
-                    admit_student(x, y, c.lower(), wait_list)
+                if name in present_set:
+                    admit_student(x, y, name, wait_list)
                     output_df.iat[r, 2] = "PRESENT"
 
-                if c.lower() in absent_set:
+                if name in absent_set:
                     output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
@@ -154,7 +168,7 @@ def admit_student(x, y, student, wait_list):
 
     for person in wait_list:
         if person['Text'] == student:
-            print("FOUND: " + student)
+            print(f'FOUND: {student}!!!')
             match = person
 
     if match is not None:

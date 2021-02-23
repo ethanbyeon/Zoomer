@@ -44,6 +44,7 @@ def get_text_coordinates(x, y, width, height):
             if d['text'][i] != 0 and len(d['text'][i]) != 0:
                 if d['text'][i + 1] != 0 and len(d['text'][i + 1]) != 0:
                     text = d['text'][i] + ' ' + d['text'][i + 1]
+                    print('DETECTED:', text)
 
                     if re.match(r'Meeting \([0-5]\)', text) or re.match(r'[0-50] the', text) or re.match(r'\([1-50]\) >', text) or text == "the Meeting":
                         cv2.rectangle(gray,
@@ -53,7 +54,7 @@ def get_text_coordinates(x, y, width, height):
                         continue
                     else:
                         coordinates = {'x': x, 'y': y}
-                        text_coords.append({'Text': text.lower(), 'Coordinates': coordinates})
+                        text_coords.append({'Text': text, 'Coordinates': coordinates})
 
                     # CV2
                     # cv2.rectangle(gray,
