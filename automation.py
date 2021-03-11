@@ -40,9 +40,7 @@ def attendance(input_file, output_file, category):
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
     if dot_btn is not None:
-
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
-
         if search_bar is not None:
             search_x, search_y = search_bar[0] - 40, search_bar[1] + 20
             width = dot_btn[0] - search_x
@@ -68,8 +66,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
 
     if leader:
         in_df = pd.read_csv(input_file)
-
-        print("ADMITTING LEADERS... ------------------")
+        print("Admitting LEADERS . . .")
         for r in range(len(in_df.iloc[:, 1])):
             info = ((in_df.iloc[r, 1]).replace(',', '').replace('(', '').replace(')', '')).split(' ')
             
@@ -89,7 +86,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
             else:
                 students.add(name)
     else:
-        print("ADMITTING STUDENTS... -----------------")
+        print("Admitting STUDENTS . . .")
         for r in range(0, len(out_df.iloc[:, 1:2])):
             for c in out_df.iloc[r, 1:2]:
                 info = c.replace(',', '').split(' ')
@@ -105,7 +102,7 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
                         students.add(name)
 
     for name in students:
-        print(name)
+        print(f"[?] Searching  : {name}")
         pug.click(search_bar)
         pug.typewrite(name)
 
@@ -113,27 +110,27 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
 
         if meeting_label is not None:
             wait_list = capture.get_text_coordinates(x, y, width, height)
-            wait_name = set(student['Text'].replace('‘','') for student in wait_list)
+            wait_name = set(student['Text'] for student in wait_list)
 
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
 
             record_student(x, y, present_students, absent_students, wait_list, output_file, leader)
             search()
-    
-    print('----------------RESULTS----------------')
-    print(f'ABSENT  ({len(absent_students)}):', absent_students)
-    print('---------------------------------------')
+        
+    print(f"[#] ABSENT  ({len(absent_students)}): {absent_students}")
+    print(f"[#] PRESENT ({len(present_students)}): {present_students}")
 
 
 def search():
     blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
-
     if blue_close_btn is not None:
         pug.click(blue_close_btn)
 
 
 def record_student(x, y, present_set, absent_set, wait_list, output_file, leader):
+    global student_prep, leader_prep
+
     output_df = pd.read_csv(output_file)
     output_df.fillna("NA", inplace=True)
 
@@ -148,7 +145,6 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
                 if name in present_set:
                     admit_student(x, y, name, wait_list)
                     output_df.iat[r, 2] = "PRESENT"
-
                 if name in absent_set:
                     output_df.iat[r, 2] = "ABSENT"
 
@@ -156,7 +152,6 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
 
     output_df.to_csv(output_file, index=False)
 
-    global student_prep, leader_prep
     if leader:
         leader_prep = True
     else:
@@ -164,11 +159,9 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
 
 
 def admit_student(x, y, student, wait_list):
-    match = None
-
     for person in wait_list:
         if person['Text'] == student:
-            print(f'FOUND: {student}!!!')
+            print(f'[!] IDENTIFIED : {student}')
             match = person
 
     if match is not None:
