@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, intital-scale=1.0">
+    <title>NZA</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <link href="/css/style.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="remote">
+      <label for="file" onclick="getPath('roster')" id="roster">
+        SELECT ROSTER
+      </label>
+      <label for="roster" onclick="getPath('attendance')" id="attendance">
+        SELECT ATTENDANCE SHEET
+      </label>
+
+      <script src="js/setup.js"></script>
+
+      <button class="update-btn" onclick="eel.start('student')">Admit Students</button>
+      <button class="update-btn" onclick="eel.start('leader')">Admit Leaders</button>
+    </div>
+  </body>
+</html>

@@ -54,10 +54,10 @@ def get_text_coordinates(x, y, width, height):
                     text_coords.append({'Text': text, 'Coordinates': coordinates})
                     print(f"[.] Recognized : {text}")
 
-                    cv2.rectangle(resized,
-                        (x - 10, y - 10),
-                        ((x + w + w2) + 20, (y + h) + 10),
-                        (0, 0, 255), 2)
-                    cv2.imshow("OCR Image", resized)
+                    # cv2.rectangle(resized,
+                    #     (x - 10, y - 10),
+                    #     ((x + w + w2) + 20, (y + h) + 10),
+                    #     (0, 0, 255), 2)
+                    # cv2.imshow("OCR Image", resized)
 
     return text_coords

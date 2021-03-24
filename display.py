@@ -98,7 +98,7 @@ class Display(tk.Frame):
             bg=COLOR['danger'], 
             activebackground=COLOR['mango'], 
             activeforeground='white', 
-            command=lambda: attendance("Student"))
+            command=lambda: attendance("student"))
         self.leaders_btn = tk.Button(self, 
             text="ADMIT LEADERS", 
             font=FONT, 
@@ -109,7 +109,7 @@ class Display(tk.Frame):
             bg=COLOR['danger'], 
             activebackground=COLOR['mango'], 
             activeforeground='white', 
-            command=lambda: attendance("Leader"))
+            command=lambda: attendance("leader"))
         
         # GRID
         self.fin_border.grid(row=1, column=0, padx=17, pady=(20,10))

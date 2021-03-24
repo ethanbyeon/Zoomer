@@ -46,20 +46,19 @@ def attendance(input_file, output_file, category):
             width = dot_btn[0] - search_x
             height = (dot_btn[1] - search_y) - 300
 
-            if category == "Student":
+            if category == "student":
                 validate_students(search_x, search_y, width, height, search_bar, input_file, output_file)
-            elif category == "Leader":
+            elif category == "leader":
                 validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, leader=True)
     else:
         return None
 
 
 leader_prep, student_prep = False, False
-present_students, absent_students = set(), set()
+present_students, absent_students, students = set(), set(), set()
 
 def validate_students(x, y, width, height, search_bar, input_file, output_file, leader=False):
-    global present_students, absent_students
-    students = set()
+    global present_students, absent_students, students
 
     out_df = pd.read_csv(output_file)
     out_df.fillna("NA", inplace=True)
