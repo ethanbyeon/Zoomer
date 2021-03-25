@@ -13,7 +13,7 @@ from pytesseract import Output
 
 def find_img_coordinates(img_name, img_folder):
     with mss.mss() as sct:
-        needle = os.path.abspath("images/" + img_folder + '/' + img_name)
+        needle = os.path.abspath("res/" + img_folder + '/' + img_name)
         haystack = np.array(sct.grab(sct.monitors[1]).pixels, dtype=np.uint8)
         img_coordinates = pug.locate(needle, haystack, grayscale=True, confidence=0.8)
 

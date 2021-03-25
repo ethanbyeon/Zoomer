@@ -6,22 +6,24 @@
     <title>NZA</title>
 
     <script type="text/javascript" src="/eel.js"></script>
+    <script src="js/setup.js"></script>
     <link href="/css/style.css" rel="stylesheet">
   </head>
 
   <body>
     <div class="remote">
-      <label for="file" onclick="getPath('roster')" id="roster">
+      <label id="roster" class="fade" onclick="getPath('roster')">
         SELECT ROSTER
       </label>
-      <label for="roster" onclick="getPath('attendance')" id="attendance">
+      <label id="attendance" class="fade" onclick="getPath('attendance')">
         SELECT ATTENDANCE SHEET
       </label>
-
-      <script src="js/setup.js"></script>
-
-      <button class="update-btn" onclick="eel.start('student')">Admit Students</button>
-      <button class="update-btn" onclick="eel.start('leader')">Admit Leaders</button>
+      <label id="student" class="fade" onclick="eel.admit('student')">
+        ADMIT STUDENTS
+      </label>
+      <label id="leader" class="fade" onclick="eel.admit('leader')">
+        ADMIT LEADERS
+      </label>
     </div>
   </body>
 </html>

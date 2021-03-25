@@ -117,8 +117,8 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
             record_student(x, y, present_students, absent_students, wait_list, output_file, leader)
             search()
         
-    print(f"[#] ABSENT  ({len(absent_students)}): {absent_students}")
-    print(f"[#] PRESENT ({len(present_students)}): {present_students}")
+    print(f"ABSENT  ({len(absent_students)}): {absent_students}")
+    print(f"PRESENT ({len(present_students)}): {present_students}")
 
 
 def search():
@@ -165,4 +165,4 @@ def admit_student(x, y, student, wait_list):
 
     if match is not None:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
-        pug.click(pug.locateOnScreen('images/meeting/admit_btn.png', grayscale=True))
+        pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
