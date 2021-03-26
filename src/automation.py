@@ -35,21 +35,21 @@ def setup_df(input_file, output_file):
     output_df = pd.DataFrame(student)
     output_df.to_csv(output_file, index=False)
 
-
+x, y, width = 0, 0, 0
 def attendance(input_file, output_file, category):
+    global x, y, width
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
     if dot_btn is not None:
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
         if search_bar is not None:
-            search_x, search_y = search_bar[0] - 40, search_bar[1] + 20
-            width = dot_btn[0] - search_x
-            height = (dot_btn[1] - search_y) - 300
+            x, y = search_bar[0] - 100, search_bar[1] + 20
+            width = dot_btn[0] - x
 
             if category == "student":
-                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file)
+                validate(search_bar, input_file, output_file)
             elif category == "leader":
-                validate_students(search_x, search_y, width, height, search_bar, input_file, output_file, leader=True)
+                validate(search_bar, input_file, output_file, leader=True)
     else:
         return None
 
@@ -57,8 +57,8 @@ def attendance(input_file, output_file, category):
 leader_prep, student_prep = False, False
 present_students, absent_students, students = set(), set(), set()
 
-def validate_students(x, y, width, height, search_bar, input_file, output_file, leader=False):
-    global present_students, absent_students, students
+def validate(search_bar, input_file, output_file, leader=False):
+    global present_students, absent_students, students, width
 
     out_df = pd.read_csv(output_file)
     out_df.fillna("NA", inplace=True)
@@ -73,7 +73,6 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
                 df_name = f'{info[0]}, {info[1]} {info[2]}'
             elif len(info) == 3:
                 df_name = f'{info[0]}, {info[1]}'
-
             name = f'{info[1]} {info[0]}'
 
             if leader_prep:
@@ -105,16 +104,24 @@ def validate_students(x, y, width, height, search_bar, input_file, output_file, 
         pug.click(search_bar)
         pug.typewrite(name)
 
-        meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
-
-        if meeting_label is not None:
+        wait_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
+        in_meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
+        
+        if wait_label is not None and in_meeting_label is not None:
+            x, y = wait_label[0] - 20, wait_label[1] + 10
+            height = in_meeting_label[1] - (wait_label[1] + 25)
+            
             wait_list = capture.get_text_coordinates(x, y, width, height)
             wait_name = set(student['Text'] for student in wait_list)
+            
+            if len(wait_name) > 1:
+                print(f"IMPOSTER DETECTED: {name}")
+                continue
 
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
 
-            record_student(x, y, present_students, absent_students, wait_list, output_file, leader)
+            record_student(present_students, absent_students, wait_list, output_file, leader)
             search()
         
     print(f"ABSENT  ({len(absent_students)}): {absent_students}")
@@ -127,7 +134,7 @@ def search():
         pug.click(blue_close_btn)
 
 
-def record_student(x, y, present_set, absent_set, wait_list, output_file, leader):
+def record_student(present_set, absent_set, wait_list, output_file, leader):
     global student_prep, leader_prep
 
     output_df = pd.read_csv(output_file)
@@ -142,13 +149,12 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
                 continue
             else:
                 if name in present_set:
-                    admit_student(x, y, name, wait_list)
+                    admit_student(name, wait_list)
                     output_df.iat[r, 2] = "PRESENT"
                 if name in absent_set:
                     output_df.iat[r, 2] = "ABSENT"
 
             output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
-
     output_df.to_csv(output_file, index=False)
 
     if leader:
@@ -157,7 +163,8 @@ def record_student(x, y, present_set, absent_set, wait_list, output_file, leader
         student_prep = True
 
 
-def admit_student(x, y, student, wait_list):
+def admit_student(student, wait_list):
+    global x, y
     for person in wait_list:
         if person['Text'] == student:
             print(f'[!] IDENTIFIED : {student}')
@@ -166,3 +173,4 @@ def admit_student(x, y, student, wait_list):
     if match is not None:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
+        print(f'[!] ADMITTED   : {match}')

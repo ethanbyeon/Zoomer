@@ -29,7 +29,7 @@ class Display(tk.Frame):
     def main(cls):
         root = tk.Tk()
         root.title("NZA")
-        root.iconbitmap('images/check.ico')
+        root.iconbitmap('res/check.ico')
         root.configure(bg=COLOR['ash'])
         root.geometry(f'{WIN_W}x{WIN_H}')
 
