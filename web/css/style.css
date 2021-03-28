@@ -16,8 +16,11 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
     background: var(--ash);
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .remote {
@@ -33,9 +36,6 @@ label {
     border: 4px solid var(--xanadu);
     color: var(--kombu);
     text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 20px;
     width: 180px;
     margin: 2px 0;
     padding: 30px 30px;
@@ -50,41 +50,26 @@ label:hover {
 /* BUTTONS */
 .fade {
     opacity: 0;
-    animation: fadeIn 1s ease-in both;
+    animation: fadeIn 0.5s ease-in both;
 }
-
-.update-btn {
-    background: var(--danger);
-    color:var(--cream);
-    transition: 0.3s;
-}
-.update-btn:hover {
-    background: var(--mango);
-    cursor: pointer;
-}
-.update-btn:focus {
-    background: var(--success);
-    outline: none;
-}
-
 #roster {
     animation-delay: 0.25s;
 }
 #attendance {
     animation-delay: 0.5s;
 }
-#student {
-    background: rgba(240, 77 ,67, 0.5);
+#student, #leader {
+    background: var(--danger);
     color: var(--cream);
-    opacity: 0.2;
-    transition: 0.3s;
+    transition: 0.5s;
+}
+#student:hover, #leader:hover {
+    background: var(--mango);
+}
+#student {
     animation-delay: 0.75s;
 }
 #leader {
-    background: rgba(240, 77 ,67, 0.5);
-    color: var(--cream);
-    opacity: 0.2;
-    transition: 0.3s;
     animation-delay: 1s;
 }
 

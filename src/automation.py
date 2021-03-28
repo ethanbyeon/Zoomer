@@ -40,9 +40,9 @@ def attendance(input_file, output_file, category):
     global x, y, width
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
-    if dot_btn is not None:
+    if dot_btn:
         search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
-        if search_bar is not None:
+        if search_bar:
             x, y = search_bar[0] - 100, search_bar[1] + 20
             width = dot_btn[0] - x
 
@@ -50,8 +50,6 @@ def attendance(input_file, output_file, category):
                 validate(search_bar, input_file, output_file)
             elif category == "leader":
                 validate(search_bar, input_file, output_file, leader=True)
-    else:
-        return None
 
 
 leader_prep, student_prep = False, False
@@ -107,7 +105,7 @@ def validate(search_bar, input_file, output_file, leader=False):
         wait_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
         in_meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
         
-        if wait_label is not None and in_meeting_label is not None:
+        if wait_label and in_meeting_label:
             x, y = wait_label[0] - 20, wait_label[1] + 10
             height = in_meeting_label[1] - (wait_label[1] + 25)
             
@@ -122,16 +120,10 @@ def validate(search_bar, input_file, output_file, leader=False):
             absent_students = students.difference(wait_name)
 
             record_student(present_students, absent_students, wait_list, output_file, leader)
-            search()
         
-    print(f"ABSENT  ({len(absent_students)}): {absent_students}")
+    print(f"\nABSENT  ({len(absent_students)}): {absent_students}")
     print(f"PRESENT ({len(present_students)}): {present_students}")
-
-
-def search():
-    blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
-    if blue_close_btn is not None:
-        pug.click(blue_close_btn)
+    print("-------")
 
 
 def record_student(present_set, absent_set, wait_list, output_file, leader):
@@ -170,7 +162,14 @@ def admit_student(student, wait_list):
             print(f'[!] IDENTIFIED : {student}')
             match = person
 
-    if match is not None:
+    if match:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
-        print(f'[!] ADMITTED   : {match}')
+        print(f"[!] ADMITTED   : {match['Text']}")
+    search()
+
+
+def search():
+    blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
+    if blue_close_btn:
+        pug.click(blue_close_btn)

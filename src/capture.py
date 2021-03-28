@@ -18,8 +18,8 @@ def find_img_coordinates(img_name, img_folder):
         img_coordinates = pug.locate(needle, haystack, grayscale=True, confidence=0.8)
 
     if img_coordinates is not None:
-        img_getX, img_getY = pug.center(img_coordinates)
-        return img_getX, img_getY
+        img_x, img_y = pug.center(img_coordinates)
+        return img_x, img_y
     else:
         print('Image "' + img_name + '" not found')
         return None
