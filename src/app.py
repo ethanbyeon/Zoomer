@@ -29,19 +29,15 @@ def output_file():
     root.wm_attributes('-topmost',1)
     file = filedialog.asksaveasfilename(defaultextension='.csv')
     FILES["Output"] = file
+    automation.export(FILES["Output"])
     return file
 
 
 @eel.expose
 def admit(category):
-    if FILES.get('Input') and FILES.get('Output'):
-        automation.setup_df(FILES["Input"], FILES["Output"])
-        automation.attendance(FILES["Input"], FILES["Output"], category)
-    elif not FILES.get('Input') and FILES.get('Output'):
-        print("Please select a Roster.")
-    elif not FILES.get('Output') and FILES.get('Input'):
-        print("Please select an Attendance Sheet.")
+    if FILES.get('Input'):
+        automation.attendance(FILES["Input"], category)
     else:
-        print("Please select a Roster AND an Attendance Sheet.")
+        print("Please select a Roster.")
 
 eel.start('index.html')

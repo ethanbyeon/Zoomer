@@ -5,12 +5,15 @@ import pandas as pd
 import pyautogui as pug
 
 from tkinter import filedialog
+from collections import OrderedDict
 
-def setup_df(input_file, output_file):
+setup = False
+def setup_df(input_file):
+    global df
+    
     student_df = pd.read_csv(input_file)
-
     student_df.fillna('NA', inplace=True)
-    student = {'Student ID': [], 'Name': [], 'Status': [], 'Time': [], 'Date': []}
+    d = OrderedDict({'ID': [], 'Name': [], 'Status': [], 'Time': []})
     
     students = []
     for r in range(0, len(student_df.iloc[:, 1:])):
@@ -22,22 +25,32 @@ def setup_df(input_file, output_file):
         info = (s.replace(',', '').replace('(', '').replace(')', '')).split(' ')
 
         if len(info) == 4:
-            student['Name'].append(f'{info[0]}, {info[1]} {info[2]}')
-            student['Student ID'].append(info[3])
+            d['Name'].append(f'{info[0]}, {info[1]} {info[2]}')
+            d['ID'].append(info[3])
         elif len(info) == 3:
-            student['Name'].append(f'{info[0]}, {info[1]}')
-            student['Student ID'].append(info[2])
+            d['Name'].append(f'{info[0]}, {info[1]}')
+            d['ID'].append(info[2])
 
-        student['Status'].append("NA")
-        student['Time'].append("NA")
-        student['Date'].append(pd.to_datetime('today').date().strftime('%m/%d/%Y'))
+        d['Status'].append("NA")
+        d['Time'].append("NA")
+    df = pd.DataFrame(d)
 
-    output_df = pd.DataFrame(student)
-    output_df.to_csv(output_file, index=False)
+
+def export(output_file):
+    try:
+        df.to_csv(output_file, index=False)
+    except NameError:
+        print("You can only export data to CSV once you have taken attendance.")
+
 
 x, y, width = 0, 0, 0
-def attendance(input_file, output_file, category):
-    global x, y, width
+def attendance(input_file, category):
+    global setup, x, y, width, df
+    #place try block for setup
+    if not setup:
+        setup_df(input_file)
+        setup = True
+
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
     if dot_btn:
@@ -47,19 +60,16 @@ def attendance(input_file, output_file, category):
             width = dot_btn[0] - x
 
             if category == "student":
-                validate(search_bar, input_file, output_file)
+                validate(search_bar, input_file)
             elif category == "leader":
-                validate(search_bar, input_file, output_file, leader=True)
+                validate(search_bar, input_file, leader=True)
 
 
 leader_prep, student_prep = False, False
 present_students, absent_students, students = set(), set(), set()
 
-def validate(search_bar, input_file, output_file, leader=False):
+def validate(search_bar, input_file, leader=False):
     global present_students, absent_students, students, width
-
-    out_df = pd.read_csv(output_file)
-    out_df.fillna("NA", inplace=True)
 
     if leader:
         in_df = pd.read_csv(input_file)
@@ -73,31 +83,26 @@ def validate(search_bar, input_file, output_file, leader=False):
                 df_name = f'{info[0]}, {info[1]}'
             name = f'{info[1]} {info[0]}'
 
-            if leader_prep:
-                name_pos = out_df.loc[(df_name == out_df['Name'])].index[0]
-                if out_df.iat[name_pos, 2] == "ABSENT":
-                    students.add(name)
-                else:
-                    continue
+            name_pos = df.loc[(df_name == df['Name'])].index[0]
+            if df.iat[name_pos, 2] == "PRESENT":
+                continue
             else:
                 students.add(name)
+                absent_students.add(name)
     else:
         print("Admitting STUDENTS . . .")
-        for r in range(0, len(out_df.iloc[:, 1:2])):
-            for c in out_df.iloc[r, 1:2]:
+        for r in range(0, len(df.iloc[:, 1:2])):
+            for c in df.iloc[r, 1:2]:
                 info = c.replace(',', '').split(' ')
                 name = f'{info[1]} {info[0]}'
 
-                if student_prep:
-                    if out_df.iat[r, 2] == "ABSENT":
-                        students.add(name)
+                if df.iat[r, 2] == "PRESENT":
+                    continue
                 else:
-                    if out_df.iat[r, 2] == "PRESENT":
-                        continue
-                    else:
-                        students.add(name)
+                    students.add(name)
+                    absent_students.add(name)
 
-    for name in students:
+    for name in absent_students:
         print(f"[?] Searching  : {name}")
         pug.click(search_bar)
         pug.typewrite(name)
@@ -119,40 +124,31 @@ def validate(search_bar, input_file, output_file, leader=False):
             present_students = wait_name.intersection(students)
             absent_students = students.difference(wait_name)
 
-            record_student(present_students, absent_students, wait_list, output_file, leader)
-        
+            record_student(present_students, absent_students, wait_list, leader)
+    
     print(f"\nABSENT  ({len(absent_students)}): {absent_students}")
     print(f"PRESENT ({len(present_students)}): {present_students}")
     print("-------")
 
 
-def record_student(present_set, absent_set, wait_list, output_file, leader):
+def record_student(present_set, absent_set, wait_list, leader):
     global student_prep, leader_prep
 
-    output_df = pd.read_csv(output_file)
-    output_df.fillna("NA", inplace=True)
-
-    for r in range(0, len(output_df.iloc[:, 1:2])):
-        for c in output_df.iloc[r, 1:2]:
+    for r in range(0, len(df.iloc[:, 1:2])):
+        for c in df.iloc[r, 1:2]:
             info = (c.replace(',','')).split(' ')
             name = f'{info[1]} {info[0]}'
 
-            if output_df.iat[r, 2] == "PRESENT":
+            if df.iat[r, 2] == "PRESENT":
                 continue
             else:
                 if name in present_set:
                     admit_student(name, wait_list)
-                    output_df.iat[r, 2] = "PRESENT"
+                    df.iat[r, 2] = "PRESENT"
                 if name in absent_set:
-                    output_df.iat[r, 2] = "ABSENT"
-
-            output_df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
-    output_df.to_csv(output_file, index=False)
-
-    if leader:
-        leader_prep = True
-    else:
-        student_prep = True
+                    df.iat[r, 2] = "ABSENT"
+            df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
+    # print(df)
 
 
 def admit_student(student, wait_list):
