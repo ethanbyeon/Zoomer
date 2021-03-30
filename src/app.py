@@ -36,8 +36,14 @@ def output_file():
 @eel.expose
 def admit(category):
     if FILES.get('Input'):
-        automation.attendance(FILES["Input"], category)
+        try:
+            automation.attendance(FILES["Input"], category)
+        except RuntimeError:
+            raise
+        else:
+            eel.exportCSV()
     else:
         print("Please select a Roster.")
+
 
 eel.start('index.html')

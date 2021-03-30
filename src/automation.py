@@ -22,33 +22,36 @@ def setup_df(input_file):
                 students.append(c)
 
     for s in sorted(students):
-        info = (s.replace(',', '').replace('(', '').replace(')', '')).split(' ')
-
+        info = (s.replace(',','').replace('(','').replace(')','')).split(' ')
         if len(info) == 4:
             d['Name'].append(f'{info[0]}, {info[1]} {info[2]}')
             d['ID'].append(info[3])
         elif len(info) == 3:
             d['Name'].append(f'{info[0]}, {info[1]}')
             d['ID'].append(info[2])
+        else:
+            print(f"Format error in cell containing: {info}")
 
         d['Status'].append("NA")
         d['Time'].append("NA")
     df = pd.DataFrame(d)
+    # print(df)
 
 
 def export(output_file):
-    try:
-        df.to_csv(output_file, index=False)
-    except NameError:
-        print("You can only export data to CSV once you have taken attendance.")
+    df.to_csv(output_file, index=False)
 
 
 x, y, width = 0, 0, 0
 def attendance(input_file, category):
     global setup, x, y, width, df
-    #place try block for setup
+    
     if not setup:
-        setup_df(input_file)
+        try:
+            setup_df(input_file)
+        except:
+            print("Error in roster!")
+            return None
         setup = True
 
     dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
@@ -63,6 +66,8 @@ def attendance(input_file, category):
                 validate(search_bar, input_file)
             elif category == "leader":
                 validate(search_bar, input_file, leader=True)
+        else:
+            print("Please clear the search bar.")
 
 
 leader_prep, student_prep = False, False
@@ -125,6 +130,11 @@ def validate(search_bar, input_file, leader=False):
             absent_students = students.difference(wait_name)
 
             record_student(present_students, absent_students, wait_list, leader)
+            close_search()
+        else:
+            close_search()
+            print("Could not locate labels.")
+            break
     
     print(f"\nABSENT  ({len(absent_students)}): {absent_students}")
     print(f"PRESENT ({len(present_students)}): {present_students}")
@@ -162,10 +172,13 @@ def admit_student(student, wait_list):
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
         print(f"[!] ADMITTED   : {match['Text']}")
-    search()
 
 
-def search():
+def close_search():
     blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
     if blue_close_btn:
-        pug.click(blue_close_btn)
+        pug.click(blue_close_btn[0]-5, blue_close_btn[1])
+    else:
+        close_btn = capture.find_img_coordinates("close_search.png", "meeting")
+        if close_btn:
+            pug.click(close_btn)
