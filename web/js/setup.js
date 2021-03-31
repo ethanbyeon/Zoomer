@@ -22,15 +22,18 @@ async function getPath(x) {
             console.log('ATTENDANCE SHEET:\n' + filename);
             btn.style.backgroundColor = '#A3DE83'
             btn.style.color = '#F0F7F4';
-            // btn.classList.add("fade")
-            eel.export(filename)
         }
     }
+}
+
+eel.expose(take_attendance);
+async function take_attendance(x) {
+    eel.admit(x);
+    exportCSV();
 }
 
 eel.expose(exportCSV);
 async function exportCSV() {
     var btn = document.getElementById('attendance')
-    console.log("FUCK YOU")
     btn.style.display = "flex";
 }

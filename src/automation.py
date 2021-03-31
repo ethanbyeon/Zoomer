@@ -1,8 +1,8 @@
-import time
 import capture
 import numpy as np
 import pandas as pd
 import pyautogui as pug
+import time
 
 from tkinter import filedialog
 from collections import OrderedDict
@@ -45,29 +45,27 @@ def export(output_file):
 x, y, width = 0, 0, 0
 def attendance(input_file, category):
     global setup, x, y, width, df
-    
-    if not setup:
-        try:
+    try:
+        if not setup:
             setup_df(input_file)
-        except:
-            print("Error in roster!")
-            return None
-        setup = True
+            setup = True
+    except:
+        print("Error in roster!")
+    else:
+        dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
 
-    dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
+        if dot_btn:
+            search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
+            if search_bar:
+                x, y = search_bar[0] - 100, search_bar[1] + 20
+                width = dot_btn[0] - x
 
-    if dot_btn:
-        search_bar = capture.find_img_coordinates("participants_search.png", "meeting")
-        if search_bar:
-            x, y = search_bar[0] - 100, search_bar[1] + 20
-            width = dot_btn[0] - x
-
-            if category == "student":
-                validate(search_bar, input_file)
-            elif category == "leader":
-                validate(search_bar, input_file, leader=True)
-        else:
-            print("Please clear the search bar.")
+                if category == "student":
+                    validate(search_bar, input_file)
+                elif category == "leader":
+                    validate(search_bar, input_file, leader=True)
+            else:
+                print("Please clear the search bar.")
 
 
 leader_prep, student_prep = False, False
@@ -181,4 +179,4 @@ def close_search():
     else:
         close_btn = capture.find_img_coordinates("close_search.png", "meeting")
         if close_btn:
-            pug.click(close_btn)
+            pug.click(close_btn[0]-5, close_btn[1])
