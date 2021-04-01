@@ -31,11 +31,14 @@ def setup_df(input_file):
             d['ID'].append(info[2])
         else:
             print(f"Format error in cell containing: {info}")
+            return False
 
         d['Status'].append("NA")
         d['Time'].append("NA")
-    df = pd.DataFrame(d)
+    
     # print(df)
+    df = pd.DataFrame(d)
+    return True
 
 
 def export(output_file):
@@ -45,11 +48,8 @@ def export(output_file):
 x, y, width = 0, 0, 0
 def attendance(input_file, category):
     global setup, x, y, width, df
-    try:
-        if not setup:
-            setup_df(input_file)
-            setup = True
-    except:
+
+    if not setup_df(input_file):
         print("Error in roster!")
     else:
         dot_btn = capture.find_img_coordinates("dot_btn.png", "meeting")
@@ -137,6 +137,7 @@ def validate(search_bar, input_file, leader=False):
     print(f"\nABSENT  ({len(absent_students)}): {absent_students}")
     print(f"PRESENT ({len(present_students)}): {present_students}")
     print("-------")
+    return len(absent_students), len(present_students)
 
 
 def record_student(present_set, absent_set, wait_list, leader):
@@ -163,7 +164,6 @@ def admit_student(student, wait_list):
     global x, y
     for person in wait_list:
         if person['Text'] == student:
-            print(f'[!] IDENTIFIED : {student}')
             match = person
 
     if match:
