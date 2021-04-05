@@ -16,7 +16,10 @@ def input_file():
     root.iconbitmap('res/check.ico')
     root.wm_attributes('-topmost',1)
     file = tk.filedialog.askopenfilename(initialdir='/Desktop', title="Select A File", filetypes=(("CSV FILE", "*.csv"),))
-    FILES["Input"] = file
+    if not file == '':
+        FILES["Input"] = file
+        automation.setup_df(file)
+    
     return file
 
 
@@ -35,7 +38,7 @@ def output_file():
 
 @eel.expose
 def admit(category):
-    if FILES.get('Input'):
+    if FILES['Input']:
         automation.attendance(FILES["Input"], category)
     else:
         print("Please select a Roster.")
