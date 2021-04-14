@@ -4,7 +4,7 @@ async function getPath(x) {
 
     if(x === 'roster') {
         var path = await eel.input_file()();
-    }else if(x === 'attendance') {
+    }else if(x === 'export_btn') {
         var path = await eel.output_file()();
     }
     
@@ -17,7 +17,7 @@ async function getPath(x) {
             console.log('CLASS ROSTER:\n' + filename);
             btn.style.backgroundColor = '#A3DE83'
             btn.style.color = '#F0F7F4';
-        }else if(x === 'attendance') {
+        }else if(x === 'export_btn') {
             btn.innerHTML = 'ATTENDANCE SHEET:<br/>' + filename;
             console.log('ATTENDANCE SHEET:\n' + filename);
             btn.style.backgroundColor = '#A3DE83'
@@ -26,14 +26,28 @@ async function getPath(x) {
     }
 }
 
+
 eel.expose(take_attendance);
 async function take_attendance(x) {
     eel.admit(x);
-    exportCSV();
 }
 
-eel.expose(exportCSV);
-async function exportCSV() {
-    var btn = document.getElementById('attendance')
-    btn.style.display = "flex";
+
+eel.expose(dashboard);
+async function dashboard() {
+    let container = document.getElementById('dashboard');
+    let remote = document.getElementById('remote');
+
+    container.style.display = "flex";
+    remote.style.display = "none";
+}
+
+
+eel.expose(home);
+async function home() {
+    let container = document.getElementById('dashboard');
+    let remote = document.getElementById('remote');
+    
+    container.style.display = "none";
+    remote.style.display = "flex";
 }

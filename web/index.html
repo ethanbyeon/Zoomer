@@ -11,12 +11,9 @@
   </head>
 
   <body>
-    <div class="remote">
+    <div id="remote">
       <label id="roster" class="fade" onclick="getPath('roster')">
-        SELECT ROSTER
-      </label>
-      <label id="attendance" class="fade" onclick="getPath('attendance')">
-        EXPORT ATTENDANCE SHEET
+        UPLOAD ROSTER
       </label>
       <label id="student" class="fade" onclick="take_attendance('student')">
         ADMIT STUDENTS
@@ -24,6 +21,15 @@
       <label id="leader" class="fade" onclick="take_attendance('leader')">
         ADMIT LEADERS
       </label>
+      <label id="dash_btn" class="fade" onclick="dashboard()">
+        DASHBOARD
+      </label>
+    </div>
+    <div id="dashboard">
+      <label id="export_btn" class="fade" onclick="getPath('export_btn')">
+        EXPORT
+      </label>
+      <label id="home_btn" class="fade" onclick="home()">HOME</label>
     </div>
   </body>
 </html>

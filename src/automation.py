@@ -13,7 +13,7 @@ def setup_df(input_file):
     
     student_df = pd.read_csv(input_file)
     student_df.fillna('NA', inplace=True)
-    d = OrderedDict({'ID': [], 'Name': [], 'Status': [], 'Time': []})
+    d = OrderedDict({'ID': [], 'Name': [], 'Status': [], 'Admit Time': []})
     
     students = []
     for r in range(0, len(student_df.iloc[:, 1:])):
@@ -33,8 +33,7 @@ def setup_df(input_file):
             print(f"Format error in cell containing: {info}")
             return False
         d['Status'].append("NA")
-        d['Time'].append("NA")
-    
+        d['Admit Time'].append("NA")
     df = pd.DataFrame(d)
     # print(df)
     return True
@@ -45,11 +44,10 @@ def attendance(input_file, category):
 
     if check_screen():
         if category == "student":
-            queue = validate_students()
+            q = validate_students()
         elif category == "leader":
-            queue = validate_leaders(input_file)
-        
-        search(queue['DF'], queue['ABSENT'], category)
+            q = validate_leaders(input_file)
+        search(q)
 
 
 search_bar = None
@@ -69,32 +67,30 @@ def check_screen():
             return False
 
 
-students, present_students, absent_students = set(), set(), set()
 def validate_students():
-    global df, students, absent_students
-
     print("Admitting STUDENTS . . .")
+    students, present_students, absent_students = set(), set(), set()
     for r in range(0, len(df.iloc[:, 1:2])):
         for c in df.iloc[r, 1:2]:
             info = c.replace(',', '').split(' ')
             name = f'{info[1]} {info[0]}'
 
             if df.iat[r, 2] == "PRESENT":
-                continue
+                present_students.add(name)
             else:
                 students.add(name)
                 absent_students.add(name)
-    
-    search = {'DF': students, 'ABSENT': absent_students}
+
+    search = {'DF': students, 'ABSENT': absent_students, 'PRESENT': present_students}
+    print("SEARCH S:", search)
     return search
 
 
-leaders, present_leaders, absent_leaders = set(), set(), set()
 def validate_leaders(input_file):
-    global df, leaders, absent_leaders
-    print(df)
+    # print(df)
     in_df = pd.read_csv(input_file)
     print("Admitting LEADERS . . .")
+    leaders, present_leaders, absent_leaders = set(), set(), set()
     for r in range(len(in_df.iloc[:, 1])):
         info = ((in_df.iloc[r, 1]).replace(',', '').replace('(', '').replace(')', '')).split(' ')
 
@@ -106,22 +102,26 @@ def validate_leaders(input_file):
 
         name_pos = df.loc[(df_name == df['Name'])].index[0]
         if df.iat[name_pos, 2] == "PRESENT":
+            present_leaders.add(name)
+            print("P",name)
             continue
         else:
+            print("e",name)
             leaders.add(name)
             absent_leaders.add(name)
 
-    search = {'DF': leaders, 'ABSENT': absent_leaders}
+    search = {'DF': leaders, 'ABSENT': absent_leaders, 'PRESENT': present_leaders}
+    print("SEARCH L:", search)
     return search
 
 
-def search(df_member, absent_set, category):
-    global search_bar, width, students, absent_students, present_students, leaders, absent_leaders, present_leaders
+def search(queue):
+    global search_bar, width
 
-    for name in absent_set:
-        print(f"[?] Searching  : {name}")
+    for df_name in queue['ABSENT']:
+        print(f"[?] Searching  : {df_name}")
         pug.click(search_bar)
-        pug.typewrite(name)
+        pug.typewrite(df_name)
 
         wait_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
         in_meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
@@ -131,51 +131,46 @@ def search(df_member, absent_set, category):
             height = in_meeting_label[1] - (wait_label[1] + 25)
 
             wait_list = capture.get_text_coordinates(x, y, width, height)
-
-            # wait_name = set(student['Text'] for student in wait_list)
+            wait_name = set(student['Text'] for student in wait_list)
+            
+            # MOVE TO NEXT STUDENT IF MORE THAN ONE NAME IS DETECTED
             # if len(wait_name) > 1:
             #     print(f"IMPOSTER DETECTED: {name}")
             #     continue
-            # present = wait_name.intersection(df_member)
-            # absent = leaders.difference(wait_name)
 
-            if len(wait_list) > 1:
-                print(f"IMPOSTER DETECTED: {name}")
-                continue
-            wait_name = wait_list[0]['Text']
-            
-            if len(wait_name) == len(name):
-                if spell_check({name : wait_name}) <= 2:
-                    present = set([name]).intersection(df_member)
-                    if category == "student":
-                        absent = students.difference(set([name]))
-                    elif category == "leader":
-                        absent = leaders.difference(set([name]))
-            else:
-                present = set([wait_name]).intersection(df_member)
-                absent = df_member.difference(set([wait_name]))
-            
-            if category == "student":
-                present_students = present
-                absent_students = absent
-            elif category == "leader":
-                present_leaders = present
-                absent_leaders = absent
+            print("P:", queue['PRESENT'])
+            print("A:", queue['ABSENT'])
 
-            record_student(present, absent, wait_list)
+            for name in wait_name:
+                if len(name) == len(df_name):
+                    if spell_check({df_name : name}) <= 2:
+                        present = set([df_name]).intersection(queue['DF'])
+                        absent = queue['DF'].difference(set([df_name]))
+                else:
+                    present = set([name]).intersection(queue['DF'])
+                    absent = queue['DF'].difference(set([name]))
+            print("BEFORE", absent)
+            if len(present) != 0:
+                queue['PRESENT'] = present
+            queue['ABSENT'] = absent
+
+            print("P2:", queue['PRESENT'])
+            print("A2:", queue['ABSENT'])
+
+            record_student(queue['PRESENT'], queue['ABSENT'], wait_list)
             close_search()
         else:
             close_search()
             print("Could not locate labels.")
             break
     
-    print(f"\nABSENT  ({len(absent)}): {absent}")
-    print(f"PRESENT ({len(present)}): {present}")
+    print(f"\nABSENT  ({len(queue['ABSENT'])}): {queue['ABSENT']}")
+    print(f"PRESENT ({len(queue['PRESENT'])}): {queue['PRESENT']}")
     print("-------")
     return len(absent), len(present)
 
 
-def record_student(present_set, absent_set, wait_list):
+def record_student(present, absent, wait_list):
 
     for r in range(0, len(df.iloc[:, 1:2])):
         for c in df.iloc[r, 1:2]:
@@ -185,27 +180,26 @@ def record_student(present_set, absent_set, wait_list):
             if df.iat[r, 2] == "PRESENT":
                 continue
             else:
-                wait_name = wait_list[0]['Text']
-                if name in present_set:
-                    admit_student(wait_list)
+                if name in present:
+                    admit_student(name, wait_list)
                     df.iat[r, 2] = "PRESENT"
-                elif len(name) == len(wait_name):
-                    if spell_check({name : wait_name}) <= 2:
-                        print("SPELL CHECKED!")
-                        admit_student(wait_list)
-                        df.iat[r, 2] = "PRESENT"
-                elif name in absent_set:
+                    print("ADMITTED")
+                elif name in absent:
                     df.iat[r, 2] = "ABSENT"
             df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
     print(df)
 
 
-def admit_student(student):
+def admit_student(name, wait_list):
     global x, y
-
-    pug.moveTo(x + student[0]['Coordinates']['x'], y + student[0]['Coordinates']['y'])
-    pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
-    print(f"[!] ADMITTED   : {student[0]['Text']}")
+    match = None
+    for wait_name in wait_list:
+        if name == wait_name['Text']:
+            match = wait_name
+    if match:
+        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+        pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
+        print(f"[!] ADMITTED   : {match['Text']}")
 
 
 def spell_check(name_dict):
@@ -214,6 +208,7 @@ def spell_check(name_dict):
         for i in range(len(value)):
             if(value[i] != key[i]):
                 count+=1
+    print(name_dict, count)
     return count
 
 

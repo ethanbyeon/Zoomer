@@ -23,7 +23,7 @@ body {
     letter-spacing: 1px;
 }
 
-.remote {
+#remote {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -47,17 +47,20 @@ label:hover {
     cursor: pointer;
 }
 
+#dashboard {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
 /* BUTTONS */
 .fade {
     opacity: 0;
     animation: fadeIn 0.5s ease-in both;
 }
-#roster {
-    animation-delay: 0.25s;
-}
-#attendance {
-    display: none;
-}
+
 #student, #leader {
     background: var(--danger);
     color: var(--cream);
@@ -66,11 +69,18 @@ label:hover {
 #student:hover, #leader:hover {
     background: var(--mango);
 }
-#student {
+
+#roster, #export_btn {
+    animation-delay: 0.25s;
+}
+#student, #home_btn {
     animation-delay: 0.5s;
 }
 #leader {
     animation-delay: 0.75s;
+}
+#dash_btn {
+    animation-delay: 1.0s;
 }
 
 @keyframes fadeIn {
