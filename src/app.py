@@ -39,9 +39,10 @@ def output_file():
 @eel.expose
 def admit(category):
     if FILES['Input']:
-        automation.attendance(FILES["Input"], category)
+        return automation.attendance(FILES["Input"], category)
     else:
         print("Please select a Roster.")
+        return "Please select<br/>Roster"
 
 
 eel.start('index.html')

@@ -21,7 +21,7 @@ async function getPath(x) {
             btn.innerHTML = 'ATTENDANCE SHEET:<br/>' + filename;
             console.log('ATTENDANCE SHEET:\n' + filename);
             btn.style.backgroundColor = '#A3DE83'
-            btn.style.color = '#F0F7F4';
+            btn.style.color = '#3C493F';
         }
     }
 }
@@ -29,7 +29,10 @@ async function getPath(x) {
 
 eel.expose(take_attendance);
 async function take_attendance(x) {
-    eel.admit(x);
+    let attendance = await eel.admit(x)();
+    let out_div = document.getElementById('output');
+    out_div.innerHTML = attendance;
+    console.log(attendance);
 }
 
 
