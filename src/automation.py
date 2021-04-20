@@ -115,7 +115,6 @@ def validate_leaders(input_file):
         name_pos = df.loc[(df_name == df['Name'])].index[0]
         if df.iat[name_pos, 2] == "PRESENT":
             present_leaders.add(name)
-            continue
         else:
             leaders.add(name)
             absent_leaders.add(name)
@@ -160,11 +159,11 @@ def search(queue, category):
                 if (name != df_name) and len(name) == len(df_name):
                     if spell_check({df_name : name}) <= 2:
                         queue['PRESENT'].add(df_name)
-                        absent = queue['DF'].difference(set([df_name]))
+                        absent = queue['ABSENT'].difference(set([df_name]))
                         queue['ABSENT'] = absent
                 elif name == df_name:
                     print("NO SPELL:", name)
-                    absent = queue['DF'].difference(set([name]))
+                    absent = queue['ABSENT'].difference(set([name]))
                     queue['PRESENT'].add(name)
                     queue['ABSENT'] = absent
 
@@ -222,7 +221,7 @@ def admit_student(name, wait_list):
         if name == wait_name['Text']:
             match = wait_name
     if match:
-        pug.dragTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
         print(f"[!] ADMITTED   : {match['Text']}")
 
