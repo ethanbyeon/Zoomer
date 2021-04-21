@@ -34,8 +34,8 @@ def setup_df(input_file):
             return False
         d['Status'].append("NA")
         d['Admit Time'].append("NA")
+
     df = pd.DataFrame(d)
-    # print(df)
     return True
 
 
@@ -56,9 +56,9 @@ def check_screen():
             return "Please clear<br/>search bar"
     else:
         return """Check:
-                <br/>Host Permissions
+                <br/>Hosting Privileges
                 <br/>Participants tab is open.
-                <br/>\"More\" (Three dots) button <br/>is exposed.
+                <br/>No tabs are overlapping.
                 """
 
 def attendance(input_file, category):
@@ -99,7 +99,6 @@ def validate_students():
 
 
 def validate_leaders(input_file):
-    # print(df)
     in_df = pd.read_csv(input_file)
     print("Admitting LEADERS . . .")
     leaders, present_leaders, absent_leaders = set(), set(), set()

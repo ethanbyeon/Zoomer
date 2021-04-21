@@ -24,8 +24,15 @@ body {
 }
 
 #output {
-    text-align: center;
-    margin: 30px 0;
+    border: none;
+    margin: 20px 0;
+    padding: 20px 20px;
+    width: 300px;
+}
+#output.display:hover {
+    background: var(--ash);
+    color: var(--kombu);
+    cursor: default;
 }
 
 #remote {

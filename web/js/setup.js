@@ -29,8 +29,10 @@ async function getPath(x) {
 
 eel.expose(take_attendance);
 async function take_attendance(x) {
-    let attendance = await eel.admit(x)();
     let out_div = document.getElementById('output');
+    out_div.innerHTML = `Please Wait<br/>Admitting ${x}...`;
+    
+    let attendance = await eel.admit(x)();
     out_div.innerHTML = attendance;
     console.log(attendance);
 }
