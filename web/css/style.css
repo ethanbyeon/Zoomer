@@ -8,6 +8,16 @@
     --danger: #F04D43;
     --mango: #FB9927;
     --success: #A3DE83;
+
+    --void: #181818;
+    --d21: #212121;
+    --grey: #3D3D3D;
+    --lgrey: #AAAAAA;
+    --light: #EAEAEA;
+
+    --caution: #EDB230;
+    --sizzling: #F2545B;
+    --apple: #B2EF9B;
 }
 
 * {
@@ -16,23 +26,11 @@
 }
 
 body {
-    background: var(--ash);
+    background: var(--lgrey);
     font-family: 'Poppins', sans-serif;
     font-size: 20px;
     text-transform: uppercase;
     letter-spacing: 1px;
-}
-
-#output {
-    border: none;
-    margin: 20px 0;
-    padding: 20px 20px;
-    width: 300px;
-}
-#output.display:hover {
-    background: var(--ash);
-    color: var(--kombu);
-    cursor: default;
 }
 
 #remote {
@@ -43,10 +41,24 @@ body {
     height: 100vh;
 }
 
+#output {
+    background: var(--lgrey);
+    color: var(--void);
+    text-align: center;
+    font-size: 32px;
+    padding: 20px 20px;
+    width: 300px;
+}
+#output.display:hover {
+    background: var(--lgrey);
+    color: var(--void);
+    cursor: default;
+}
+
 /* LABELS */
 label {
-    border: 3px solid var(--xanadu);
-    color: var(--kombu);
+    background: var(--d21);
+    color: var(--light);
     text-align: center;
     width: 180px;
     margin: 2px 0;
@@ -54,9 +66,15 @@ label {
     transition: 0.5s;
 }
 label:hover {
-    background: var(--mango);
-    color: var(--white);
+    background: var(--caution);
+    color: var(--light);
     cursor: pointer;
+}
+label:first-of-type {
+    border-radius: 15px 15px 0 0;
+}
+label:last-of-type {
+    border-radius: 0 0 15px 15px;
 }
 
 #dashboard {
@@ -74,12 +92,18 @@ label:hover {
 }
 
 #student, #leader {
-    background: var(--danger);
-    color: var(--white);
+    background: var(--d21);
+    color: var(--light);
     transition: 0.5s;
 }
 #student:hover, #leader:hover {
-    background: var(--mango);
+    background: var(--sizzling);
+}
+
+/* ICONS */
+ion-icon {
+    font-size: 32px;
+    color: var(--light);
 }
 
 /* ANIMATIONS */

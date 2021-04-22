@@ -56,9 +56,9 @@ def check_screen():
             return "Please clear<br/>search bar"
     else:
         return """Check:
-                <br/>Hosting Privileges
-                <br/>Participants tab is open.
-                <br/>No tabs are overlapping.
+                <br/>• Hosting Privileges
+                <br/>• Open Participant's tab
+                <br/>• No overlapping tabs
                 """
 
 def attendance(input_file, category):
@@ -146,9 +146,8 @@ def search(queue, category):
             wait_name = set(student['Text'] for student in wait_list)
             
             # MOVE TO NEXT STUDENT IF MORE THAN ONE NAME IS DETECTED
-            # if len(wait_name) > 1:
-            #     print(f"IMPOSTER DETECTED: {name}")
-            #     continue
+            if len(wait_name) > 1:
+                return f"IMPOSTER DETECTED:<br/>{df_name}"
             
             # print("B CHECK P:", queue['PRESENT'])
             # print("B CHECK A:", queue['ABSENT'])
@@ -180,6 +179,7 @@ def search(queue, category):
     print(f"\nABSENT  ({len(queue['ABSENT'])}): {queue['ABSENT']}")
     print(f"PRESENT ({len(queue['PRESENT'])}): {queue['PRESENT']}")
     print("-------")
+
     return f"ABSENT {category}<br/>{len(queue['ABSENT'])}"
 
 

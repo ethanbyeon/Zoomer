@@ -13,14 +13,15 @@ async function getPath(x) {
         var filename = path.replace(/^.*[\\\/]/, '')
 
         if(x === 'roster'){
-            btn.innerHTML = 'CLASS ROSTER:<br/>' + filename;
+            let out = '<ion-icon name="people"></ion-icon><br/>CLASS ROSTER:<br/>';
+            btn.innerHTML = out + filename;
             console.log('CLASS ROSTER:\n' + filename);
-            btn.style.backgroundColor = '#A3DE83'
+            btn.style.backgroundColor = '#C2D076'
             btn.style.color = '#F0F7F4';
         }else if(x === 'export_btn') {
             btn.innerHTML = 'ATTENDANCE SHEET:<br/>' + filename;
             console.log('ATTENDANCE SHEET:\n' + filename);
-            btn.style.backgroundColor = '#A3DE83'
+            btn.style.backgroundColor = '#C2D076'
             btn.style.color = '#3C493F';
         }
     }
@@ -30,6 +31,7 @@ async function getPath(x) {
 eel.expose(take_attendance);
 async function take_attendance(x) {
     let out_div = document.getElementById('output');
+    out_div.style.fontSize = "18px";
     out_div.innerHTML = `Please Wait<br/>Admitting ${x}...`;
     
     let attendance = await eel.admit(x)();

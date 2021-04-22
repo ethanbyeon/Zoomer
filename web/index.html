@@ -12,27 +12,42 @@
 
   <body>
     <div id="remote">
-      <label id="output" class="fade display">
+      <p id="output" class="fade display">
         NEATO
-      </label>
+      </p>
       <label id="roster" class="fade" onclick="getPath('roster')">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <br/>
         UPLOAD ROSTER
       </label>
       <label id="student" class="fade" onclick="take_attendance('STUDENTS')">
+        <ion-icon name="ticket"></ion-icon>
+        <br/>
         ADMIT STUDENTS
       </label>
       <label id="leader" class="fade" onclick="take_attendance('LEADERS')">
+        <ion-icon name="star"></ion-icon>
+        <br/>
         ADMIT LEADERS
       </label>
       <label id="dash_btn" class="fade" onclick="dashboard()">
+        <ion-icon name="arrow-forward"></ion-icon>
+        <br/>
         DASHBOARD
       </label>
     </div>
     <div id="dashboard">
       <label id="export_btn" class="fade" onclick="getPath('export_btn')">
+        <ion-icon name="download"></ion-icon>
+        <br/>
         EXPORT
       </label>
-      <label id="home_btn" class="fade" onclick="home()">HOME</label>
+      <label id="home_btn" class="fade" onclick="home()">
+        <ion-icon name="home"></ion-icon>
+        <br/>
+        HOME
+      </label>
     </div>
+    <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
   </body>
 </html>
