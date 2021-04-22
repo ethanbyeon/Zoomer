@@ -19,10 +19,11 @@ async function getPath(x) {
             btn.style.backgroundColor = '#C2D076'
             btn.style.color = '#F0F7F4';
         }else if(x === 'export_btn') {
-            btn.innerHTML = 'ATTENDANCE SHEET:<br/>' + filename;
+            let out = '<ion-icon name="clipboard"></ion-icon><br/>ATTENDANCE SHEET:<br/>';
+            btn.innerHTML = out + filename;
             console.log('ATTENDANCE SHEET:\n' + filename);
             btn.style.backgroundColor = '#C2D076'
-            btn.style.color = '#3C493F';
+            btn.style.color = '#F0F7F4';
         }
     }
 }

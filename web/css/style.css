@@ -1,23 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 :root {
-    --kombu: #3C493F;
-    --xanadu: #7E8D85;
-    --ash: #B3BFB8;
-    --white: #F0F7F4;
-    --danger: #F04D43;
-    --mango: #FB9927;
-    --success: #A3DE83;
-
     --void: #181818;
-    --d21: #212121;
+    --lvoid: #212121;
     --grey: #3D3D3D;
     --lgrey: #AAAAAA;
-    --light: #EAEAEA;
+    --snow: #EAEAEA;
 
+    --success: #C2D076;
     --caution: #EDB230;
-    --sizzling: #F2545B;
-    --apple: #B2EF9B;
+    --danger: #F2545B;
 }
 
 * {
@@ -57,8 +49,8 @@ body {
 
 /* LABELS */
 label {
-    background: var(--d21);
-    color: var(--light);
+    background: var(--lvoid);
+    color: var(--snow);
     text-align: center;
     width: 180px;
     margin: 2px 0;
@@ -67,7 +59,7 @@ label {
 }
 label:hover {
     background: var(--caution);
-    color: var(--light);
+    color: var(--snow);
     cursor: pointer;
 }
 label:first-of-type {
@@ -92,18 +84,18 @@ label:last-of-type {
 }
 
 #student, #leader {
-    background: var(--d21);
-    color: var(--light);
+    background: var(--lvoid);
+    color: var(--snow);
     transition: 0.5s;
 }
 #student:hover, #leader:hover {
-    background: var(--sizzling);
+    background: var(--danger);
 }
 
 /* ICONS */
 ion-icon {
     font-size: 32px;
-    color: var(--light);
+    color: var(--snow);
 }
 
 /* ANIMATIONS */
