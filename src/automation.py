@@ -39,8 +39,6 @@ def setup_df(input_file):
     return True
 
 
-search_bar = None
-x, y, width = 0, 0, 0
 def check_screen():
     global search_bar, x, y, width
     
@@ -70,7 +68,7 @@ def attendance(input_file, category):
             q = validate_students()
         elif category == "LEADERS":
             q = validate_leaders(input_file)
-        return str(search(q, category))
+        return str(search(q))
     else:
         return screen
 
@@ -127,7 +125,7 @@ def validate_leaders(input_file):
     return search
 
 
-def search(queue, category):
+def search(queue):
     global search_bar, width, df
     
     for df_name in queue['ABSENT']:
@@ -143,32 +141,30 @@ def search(queue, category):
             height = in_meeting_label[1] - (wait_label[1] + 25)
 
             wait_list = capture.get_text_coordinates(x, y, width, height)
-            wait_name = set(student['Text'] for student in wait_list)
             
             # MOVE TO NEXT STUDENT IF MORE THAN ONE NAME IS DETECTED
-            if len(wait_name) > 1:
+            if len(wait_list) > 1:
                 return f"IMPOSTER DETECTED:<br/>{df_name}"
             
-            # print("B CHECK P:", queue['PRESENT'])
-            # print("B CHECK A:", queue['ABSENT'])
-            print("WAIT:", wait_name)
-
-            for name in wait_name:
+            print("WAIT:", wait_list)
+            for person in wait_list:
+                name = person['Text']
                 if (name != df_name) and len(name) == len(df_name):
                     if spell_check({df_name : name}) <= 2:
                         queue['PRESENT'].add(df_name)
                         absent = queue['ABSENT'].difference(set([df_name]))
                         queue['ABSENT'] = absent
+                        person['Text'] = df_name
                 elif name == df_name:
                     print("NO SPELL:", name)
                     absent = queue['ABSENT'].difference(set([name]))
                     queue['PRESENT'].add(name)
                     queue['ABSENT'] = absent
 
-            print("P AFTER QUEUE:", queue['PRESENT'])
-            print("A AFTER QUEUE:", queue['ABSENT'])
+            # print("P AFTER QUEUE:", queue['PRESENT'])
+            # print("A AFTER QUEUE:", queue['ABSENT'])
 
-            record_student(queue['PRESENT'], queue['ABSENT'], wait_list)
+            record(queue['PRESENT'], queue['ABSENT'], wait_list)
             close_search()
         else:
             close_search()
@@ -179,8 +175,8 @@ def search(queue, category):
     print(f"\nABSENT  ({len(queue['ABSENT'])}): {queue['ABSENT']}")
     print(f"PRESENT ({len(queue['PRESENT'])}): {queue['PRESENT']}")
     print("-------")
-
-    return f"ABSENT {category}<br/>{len(queue['ABSENT'])}"
+    result = f"{len(queue['ABSENT'])} {len(queue['PRESENT'])}"
+    return result
 
 
 def spell_check(name_dict):
@@ -189,12 +185,11 @@ def spell_check(name_dict):
         for i in range(len(value)):
             if(value[i] != key[i]):
                 count+=1
-    print(name_dict, count)
+    print(f"SPELL CHECK: {name_dict} {count}")
     return count
 
 
-def record_student(present, absent, wait_list):
-
+def record(present, absent, wait_list):
     for r in range(0, len(df.iloc[:, 1:2])):
         for c in df.iloc[r, 1:2]:
             info = (c.replace(',','')).split(' ')
@@ -204,25 +199,25 @@ def record_student(present, absent, wait_list):
                 continue
             else:
                 if name in present:
-                    admit_student(name, wait_list)
+                    print("ADMIT:", name)
                     df.iat[r, 2] = "PRESENT"
-                    print("ADMITTED")
+                    admit(name, wait_list)
                 elif name in absent:
                     df.iat[r, 2] = "ABSENT"
+
             df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
     # print(df)
 
 
-def admit_student(name, wait_list):
+def admit(name, wait_list):
     global x, y
-    match = None
-    for wait_name in wait_list:
-        if name == wait_name['Text']:
-            match = wait_name
+
+    match = next((person for person in wait_list if person['Text'] == name), None)
     if match:
         pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
         pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
         print(f"[!] ADMITTED   : {match['Text']}")
+
 
 
 def close_search():

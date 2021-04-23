@@ -2,9 +2,9 @@ import eel
 import tkinter as tk
 import automation
 
+from os import path
 from tkinter import filedialog
 
-eel.init('web')
 
 FILES = {'Input': '', 'Output': ''}
 
@@ -44,5 +44,6 @@ def admit(category):
         print("Please select a Roster.")
         return "Please select<br/>Roster"
 
-
-eel.start('index.html')
+if __name__ == "__main__":
+    eel.init('web')
+    eel.start('index.html')

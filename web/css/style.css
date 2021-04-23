@@ -105,13 +105,13 @@ ion-icon {
 #roster, #export_btn {
     animation-delay: 0.40s;
 }
-#student, #home_btn {
+#student, #absent {
     animation-delay: 0.60s;
 }
-#leader {
+#leader, #present {
     animation-delay: 0.80s;
 }
-#dash_btn {
+#dash_btn, #home_btn {
     animation-delay: 1.0s;
 }
 
