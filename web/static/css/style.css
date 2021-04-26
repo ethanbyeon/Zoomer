@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+:root {
+    --void: #181818;
+    --lvoid: #212121;
+    --grey: #3D3D3D;
+    --lgrey: #AAAAAA;
+    --snow: #EAEAEA;
+
+    --success: #C2D076;
+    --caution: #EDB230;
+    --danger: #F2545B;
+}
+
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background-color: var(--lgrey);
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+a {
+    background-color: var(--lvoid);
+    color: var(--snow);
+    list-style: none;
+    text-decoration: none;
+    text-align: center;
+    width: 180px;
+    margin:2px 0;
+    padding: 30px 30px;
+    transition: 0.5s;
+}
+a:first-of-type {
+    border-radius: 15px 15px 0 0;
+}
+a:last-of-type {
+    border-radius: 0 0 15px 15px;
+}
+
+/* LABELS */
+label {
+    background-color: var(--lvoid);
+    color: var(--snow);
+    text-align: center;
+    width: 180px;
+    margin: 2px 0;
+    padding: 30px 30px;
+    transition: 0.5s;
+}
+label:hover, a:hover {
+    background-color: var(--caution);
+    color: var(--snow);
+    cursor: pointer;
+}
+label:first-of-type:not(:last-of-type) {
+    border-radius: 15px 15px 0 0;
+}
+
+#table {
+    background-color: var(--lgrey);
+    display: grid;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+table {
+    background-color: var(--snow);
+    border-collapse: collapse;
+    margin: 10px 20px; 
+    text-align: left;
+    overflow: hidden;
+}
+thead {
+    box-shadow: 0 5px 10px var(--grey);
+}
+th {
+    padding: 1rem 2rem;
+    letter-spacing: 0.1rem;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
+td {
+    padding: 1rem 2rem;
+}
+tr:nth-child(even) {
+    background-color: var(--lgrey);
+}
+
+
+#remote {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#output {
+    background-color: var(--lgrey);
+    color: var(--void);
+    text-align: center;
+    font-size: 30px;
+    padding: 20px 20px;
+    width: 300px;
+}
+#output.display:hover {
+    background-color: var(--lgrey);
+    color: var(--void);
+    cursor: default;
+}
+
+/* BUTTONS */
+.fade {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in both;
+}
+
+#student, #leader {
+    background-color: var(--lvoid);
+    color: var(--snow);
+    transition: 0.5s;
+}
+#student:hover, #leader:hover {
+    background-color: var(--danger);
+}
+
+/* ICONS */
+ion-icon {
+    font-size: 32px;
+    color: var(--snow);
+}
+
+/* ANIMATIONS */
+#output {
+    animation-delay: 0.20s;
+}
+#roster, #data {
+    animation-delay: 0.40s;
+}
+#student, #export_btn {
+    animation-delay: 0.60s;
+}
+#leader {
+    animation-delay: 0.80s;
+}
+#dash_btn, #home_btn {
+    animation-delay: 1.0s;
+}
+
+@keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+}

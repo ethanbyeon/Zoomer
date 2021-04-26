@@ -9,7 +9,7 @@ import pyautogui as pug
 from PIL import Image
 from pytesseract import Output
 
-# pytesseract.pytesseract.tesseract_cmd = 'Tesseract-OCR\\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\\tesseract.exe'
 
 def find_img_coordinates(img_name, img_folder):
     with mss.mss() as sct:

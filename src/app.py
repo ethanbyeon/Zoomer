@@ -4,6 +4,7 @@ import automation
 
 from os import path
 from tkinter import filedialog
+from jinja2 import Environment, FileSystemLoader
 
 
 FILES = {'Input': '', 'Output': ''}
@@ -46,4 +47,4 @@ def admit(category):
 
 if __name__ == "__main__":
     eel.init('web')
-    eel.start('index.html')
+    eel.start('templates/index.html', jinja_templates="templates")

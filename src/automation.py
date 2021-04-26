@@ -68,7 +68,7 @@ def attendance(input_file, category):
             q = validate_students()
         elif category == "LEADERS":
             q = validate_leaders(input_file)
-        return str(search(q))
+        return str(search(q, category))
     else:
         return screen
 
@@ -125,7 +125,7 @@ def validate_leaders(input_file):
     return search
 
 
-def search(queue):
+def search(queue, category):
     global search_bar, width, df
     
     for df_name in queue['ABSENT']:
@@ -175,7 +175,7 @@ def search(queue):
     print(f"\nABSENT  ({len(queue['ABSENT'])}): {queue['ABSENT']}")
     print(f"PRESENT ({len(queue['PRESENT'])}): {queue['PRESENT']}")
     print("-------")
-    result = f"{len(queue['ABSENT'])} {len(queue['PRESENT'])}"
+    result = f"ABSENT {category}<br/>{len(queue['ABSENT'])}"
     return result
 
 

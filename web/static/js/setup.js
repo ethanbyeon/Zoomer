@@ -36,13 +36,7 @@ async function take_attendance(x) {
     out_div.innerHTML = `Please Wait<br/>Admitting ${x}...`;
     
     let attendance = await eel.admit(x)();
-    let result = attendance.split(" ");
-    out_div.innerHTML = `ABSENT ${x}<br/>${result[0]}`;
-
-    let absent_ico = document.getElementById('absent');
-    let present_ico = document.getElementById('present');
-    absent_ico.innerHTML = `<ion-icon name="eye-off"></ion-icon><br/>ABSENT<br/>${result[0]}`;
-    present_ico.innerHTML = `<ion-icon name="person"></ion-icon><br/>PRESENT<br/>${result[1]}`;
+    out_div.innerHTML = attendance;
 
     console.log(attendance);
 }

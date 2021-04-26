@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Table{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript" src="/eel.js"></script>
+  <script type="text/javascript" src="/static/js/setup.js"></script>
+{% endblock %}
+
+{% block content %}
+  <div id="remote">
+    <div id="table">
+        <table>
+          <thead>
+            <tr>
+                <!-- {% for header in headings %}
+                <th>{{ header }}</th>
+                {% endfor %} -->
+                <td>ID</td>
+                <td>NAME</td>
+                <td>STATUS</td>
+                <td>ADMIT TIME</td>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- {% for row in data %}
+              <tr>
+              {% for cell in row %}
+              <tr>{{ cell }}</td>
+              {% endfor %}
+              </tr>
+            {% endfor %} -->
+            <tr>
+                <td>123456</td>
+                <td>Joe Smith</td>
+                <td>ABSENT</td>
+                <td>1:00:00</td>
+            </tr>
+            <tr>
+                <td>654321</td>
+                <td>John Doe</td>
+                <td>PRESENT</td>
+                <td>1:00:00</td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+    <a href="index.html" id="home_btn" class="fade">
+          <ion-icon name="home"></ion-icon>
+          <br/>
+          HOME
+        </a>
+  </div>
+{% endblock %}
