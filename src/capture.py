@@ -9,7 +9,7 @@ import pyautogui as pug
 from PIL import Image
 from pytesseract import Output
 
-# pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
 
 def find_img_coordinates(img_name, img_folder):
     with mss.mss() as sct:
@@ -52,7 +52,7 @@ def get_text_coordinates(x, y, width, height):
                     coordinates = {'x': x, 'y': y}
                     
                     text_coords.append({'Text': text, 'Coordinates': coordinates})
-                    print(f"[.] Recognized : {text}")
+                    # print(f"[.] Recognized : {text}")
 
                     # cv2.rectangle(resized,
                     #     (x - 10, y - 10),

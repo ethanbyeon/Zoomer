@@ -1,42 +1,56 @@
 import capture
+import datetime
 import numpy as np
 import pandas as pd
 import pyautogui as pug
-import time
 
-from tkinter import filedialog
-from collections import OrderedDict
+from tables import (Base, 
+                    engine,
+                    Attendance,
+                    Leader, 
+                    Student,
+                    Session)
+
+from sqlalchemy import select, insert, update
 
 
 def setup_df(input_file):
-    global df
+    df = pd.read_csv(input_file, header=None)
+    f_row = df.iloc[0].str.match(r"([A-Z][-a-zA-Z]*'?[-a-zA-Z]+), ([A-Z][a-z]*'?[-a-zA-Z]+)( [A-Z]'?[-a-zA-Z]*)? (\((\d{6})?\))?")
     
-    student_df = pd.read_csv(input_file)
-    student_df.fillna('NA', inplace=True)
-    d = OrderedDict({'ID': [], 'Name': [], 'Status': [], 'Admit Time': []})
-    
-    students = []
-    for r in range(0, len(student_df.iloc[:, 1:])):
-        for c in student_df.iloc[r, 1:]:
-            if c != "NA":
-                students.append(c)
+    if not f_row.any(axis=None):
+        df = df.iloc[1:]
 
-    for s in sorted(students):
-        info = (s.replace(',','').replace('(','').replace(')','')).split(' ')
-        if len(info) == 4:
-            d['Name'].append(f'{info[0]}, {info[1]} {info[2]}')
-            d['ID'].append(info[3])
-        elif len(info) == 3:
-            d['Name'].append(f'{info[0]}, {info[1]}')
-            d['ID'].append(info[2])
-        else:
-            print(f"Format error in cell containing: {info}")
-            return False
-        d['Status'].append("NA")
-        d['Admit Time'].append("NA")
+    f_col = df.iloc[:,0].str.match(r"([A-Z][-a-zA-Z]*'?[-a-zA-Z]+), ([A-Z][a-z]*'?[-a-zA-Z]+)( [A-Z]'?[-a-zA-Z]*)? (\((\d{6})?\))?")
+    if not f_col.any(axis=None):
+        df = df.iloc[:,1:]
 
-    df = pd.DataFrame(d)
-    return True
+    dfs = []
+    for index, series in df.iterrows():
+        c = series.str.extract(r"([A-Z][-a-zA-Z]*'?[-a-zA-Z]+), ([A-Z][a-z]*'?[-a-zA-Z]+)( [A-Z]'?[-a-zA-Z]*)? (\((\d{6})?\))?")
+        c.drop(columns=3, inplace=True)
+        c.dropna(how='all', inplace=True)
+        c['Leader_ID'] = c.iloc[0, 3]
+        c.rename(columns={0:'Last', 1:'First', 2:'Middle', 4:'ID'}, inplace=True)
+        c['ID'] = c['ID'].astype(int)
+        c['Leader_ID'] = c['Leader_ID'].astype(int)
+        dfs.append(c)
+
+    with engine.begin() as conn:
+        Base.metadata.create_all(conn)
+
+        for r in dfs:
+            r.iloc[:1, :4].to_sql("leader", con=conn, if_exists='append', index=False)
+            r.iloc[:1, :4].to_sql("student", con=conn, if_exists='append', index=False)
+            r.iloc[1:].to_sql("student", con=conn, if_exists='append', index=False)
+
+            for student_id in r.iloc[:, 3]:
+                dt = datetime.datetime.now()
+                dt_format = dt.strftime('%m/%d/%Y %H:%M:%S')
+                t = datetime.datetime.strptime(dt_format, '%m/%d/%Y %H:%M:%S')
+        
+                attn_table = insert(Attendance).values(id=int(student_id), date=t, status="ABSENT")
+                conn.execute(attn_table)
 
 
 def check_screen():
@@ -59,79 +73,56 @@ def check_screen():
                 <br/>• No overlapping tabs
                 """
 
-def attendance(input_file, category):
-    global df
-
+def attendance(category):
     screen = check_screen()
     if screen == True:
         if category == "STUDENTS":
-            q = validate_students()
-        elif category == "LEADERS":
-            q = validate_leaders(input_file)
-        return str(search(q, category))
+            validate_students()
+        if category == "LEADERS":
+            validate_leaders()
     else:
         return screen
 
 
 def validate_students():
-    print("Admitting STUDENTS . . .")
-    students, present_students, absent_students = set(), set(), set()
-    for r in range(0, len(df.iloc[:, 1:2])):
-        for c in df.iloc[r, 1:2]:
-            info = c.replace(',', '').split(' ')
-            name = f'{info[1]} {info[0]}'
+    with Session(engine) as session, session.begin():
+        students = session.execute(
+            select(Student, Attendance).\
+            where(Student.id == Attendance.id).\
+            where(Attendance.status == "ABSENT")
+        ).scalars().all()
 
-            if df.iat[r, 2] == "PRESENT":
-                present_students.add(name)
-            else:
-                students.add(name)
-                absent_students.add(name)
+        for student in students:
+            name = f'{student.first} {student.last}'
+            print(name)
 
-    search = {'DF': students, 'ABSENT': absent_students, 'PRESENT': present_students}
-    print("VALIDATED STUDENTS")
-    print("DF: ", search['DF'])
-    print("ABSENT: ", search['ABSENT'])
-    print("PRESENT: ", search['PRESENT'])
-    print("-------")
-    return search
+        search(students)
 
 
-def validate_leaders(input_file):
-    in_df = pd.read_csv(input_file)
-    print("Admitting LEADERS . . .")
-    leaders, present_leaders, absent_leaders = set(), set(), set()
-    for r in range(len(in_df.iloc[:, 1])):
-        info = ((in_df.iloc[r, 1]).replace(',', '').replace('(', '').replace(')', '')).split(' ')
+def validate_leaders():
+    with Session(engine) as session, session.begin():
+        leaders = session.execute(
+            select(Leader, Attendance).\
+            where(Leader.id == Attendance.id).\
+            where(Attendance.status == "ABSENT")
+        ).scalars().all()
 
-        if len(info) == 4:
-            df_name = f'{info[0]}, {info[1]} {info[2]}'
-        elif len(info) == 3:
-            df_name = f'{info[0]}, {info[1]}'
-        name = f'{info[1]} {info[0]}'
+        for leader in leaders:
+            name = f'{leader.first} {leader.last}'
+            print(name)
 
-        name_pos = df.loc[(df_name == df['Name'])].index[0]
-        if df.iat[name_pos, 2] == "PRESENT":
-            present_leaders.add(name)
-        else:
-            leaders.add(name)
-            absent_leaders.add(name)
-
-    search = {'DF': leaders, 'ABSENT': absent_leaders, 'PRESENT': present_leaders}
-    print("VALIDATED LEADERS")
-    print("DF: ", search['DF'])
-    print("ABSENT: ", search['ABSENT'])
-    print("PRESENT: ", search['PRESENT'])
-    print("-------")
-    return search
+        search(leaders)
 
 
-def search(queue, category):
-    global search_bar, width, df
-    
-    for df_name in queue['ABSENT']:
-        print(f"[?] Searching  : {df_name}")
+def search(absent_list):
+    global search_bar, width
+
+    for user in absent_list:
+        name = f'{user.first} {user.last}'
+        
+        print(f"[?] Searching  : {name}")
         pug.click(search_bar)
-        pug.typewrite(df_name)
+        pug.typewrite(name)
 
         wait_label = capture.find_img_coordinates("waiting_room_label.png", "meeting")
         in_meeting_label = capture.find_img_coordinates("in_the_meeting_label.png", "meeting")
@@ -144,39 +135,52 @@ def search(queue, category):
             
             # MOVE TO NEXT STUDENT IF MORE THAN ONE NAME IS DETECTED
             if len(wait_list) > 1:
-                return f"IMPOSTER DETECTED:<br/>{df_name}"
+                return f"IMPOSTER DETECTED:<br/>{name}"
             
-            print("WAIT:", wait_list)
+            print("WAIT LIST:", wait_list)
             for person in wait_list:
-                name = person['Text']
-                if (name != df_name) and len(name) == len(df_name):
-                    if spell_check({df_name : name}) <= 2:
-                        queue['PRESENT'].add(df_name)
-                        absent = queue['ABSENT'].difference(set([df_name]))
-                        queue['ABSENT'] = absent
-                        person['Text'] = df_name
-                elif name == df_name:
+                cv_name = person['Text']
+                if (cv_name != name) and len(cv_name) == len(name):
+                    if spell_check({name : cv_name}) <= 2:
+                        record(user)
+                        admit(name, wait_list)
+                elif cv_name == name:
                     print("NO SPELL:", name)
-                    absent = queue['ABSENT'].difference(set([name]))
-                    queue['PRESENT'].add(name)
-                    queue['ABSENT'] = absent
-
-            # print("P AFTER QUEUE:", queue['PRESENT'])
-            # print("A AFTER QUEUE:", queue['ABSENT'])
-
-            record(queue['PRESENT'], queue['ABSENT'], wait_list)
+                    record(user)
+                    admit(name, wait_list) 
             close_search()
         else:
             close_search()
             print("Could not locate labels.")
             return f'Could not<br/>locate labels.'
-            
-    print(df)
-    print(f"\nABSENT  ({len(queue['ABSENT'])}): {queue['ABSENT']}")
-    print(f"PRESENT ({len(queue['PRESENT'])}): {queue['PRESENT']}")
-    print("-------")
-    result = f"ABSENT {category}<br/>{len(queue['ABSENT'])}"
-    return result
+
+
+def record(user):
+    with Session(engine) as session, session.begin():
+        print(user)
+
+        dt = datetime.datetime.now()
+        dt_format = dt.strftime('%m/%d/%Y %H:%M:%S')
+        t = datetime.datetime.strptime(dt_format, '%m/%d/%Y %H:%M:%S')
+
+        session.execute(
+            update(Attendance).\
+            where(user.id == Attendance.id).\
+            where(Attendance.status == "ABSENT").\
+            values(status="PRESENT").\
+            values(date=t).\
+            execution_options(synchronize_session="fetch")
+        )
+        print(session.execute(select(Attendance).where(Attendance.status=="PRESENT")).scalars().all())
+
+def admit(name, wait_list):
+    global x, y
+
+    match = next((cv_name for cv_name in wait_list if cv_name['Text'] == name), None)
+    if match:
+        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
+        pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
+        print(f"[!] ADMITTED   : {match['Text']}")
 
 
 def spell_check(name_dict):
@@ -189,37 +193,6 @@ def spell_check(name_dict):
     return count
 
 
-def record(present, absent, wait_list):
-    for r in range(0, len(df.iloc[:, 1:2])):
-        for c in df.iloc[r, 1:2]:
-            info = (c.replace(',','')).split(' ')
-            name = f'{info[1]} {info[0]}'
-
-            if df.iat[r, 2] == "PRESENT":
-                continue
-            else:
-                if name in present:
-                    print("ADMIT:", name)
-                    df.iat[r, 2] = "PRESENT"
-                    admit(name, wait_list)
-                elif name in absent:
-                    df.iat[r, 2] = "ABSENT"
-
-            df.iat[r, 3] = time.strftime('%H:%M:%S', time.localtime())
-    # print(df)
-
-
-def admit(name, wait_list):
-    global x, y
-
-    match = next((person for person in wait_list if person['Text'] == name), None)
-    if match:
-        pug.moveTo(x + match['Coordinates']['x'], y + match['Coordinates']['y'])
-        pug.click(pug.locateOnScreen('res/meeting/admit_btn.png', grayscale=True))
-        print(f"[!] ADMITTED   : {match['Text']}")
-
-
-
 def close_search():
     blue_close_btn = capture.find_img_coordinates("blue_close_search.png", "meeting")
     if blue_close_btn:
@@ -228,7 +201,3 @@ def close_search():
         close_btn = capture.find_img_coordinates("close_search.png", "meeting")
         if close_btn:
             pug.click(close_btn[0]-5, close_btn[1])
-
-
-def export(output_file):
-    df.to_csv(output_file, index=False)

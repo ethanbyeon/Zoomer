@@ -4,7 +4,6 @@ import automation
 
 from os import path
 from tkinter import filedialog
-from jinja2 import Environment, FileSystemLoader
 
 
 FILES = {'Input': '', 'Output': ''}
@@ -40,7 +39,7 @@ def output_file():
 @eel.expose
 def admit(category):
     if FILES['Input']:
-        return automation.attendance(FILES["Input"], category)
+        return automation.attendance(category)
     else:
         print("Please select a Roster.")
         return "Please select<br/>Roster"
