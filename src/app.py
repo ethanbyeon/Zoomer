@@ -2,7 +2,6 @@ import eel
 import tkinter as tk
 import automation
 
-from os import path
 from tkinter import filedialog
 
 
@@ -46,4 +45,4 @@ def admit(category):
 
 if __name__ == "__main__":
     eel.init('web')
-    eel.start('templates/index.html', jinja_templates="templates")
+    eel.start('index.html')

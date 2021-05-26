@@ -27,6 +27,13 @@ class Leader(Base):
                 f'first={self.first}, ' 
                 f'middle={self.middle})')
 
+    @property
+    def serialize(self):
+        return {'id': self.id, 
+                'last': self.last,
+                'first': self.first,
+                'middle': self.middle}
+
 
 class Student(Base):
     __tablename__ = "student"
@@ -36,13 +43,32 @@ class Student(Base):
     first = Column(String(40), nullable=False)
     middle = Column(String(40))
     leader_id = Column(Integer, ForeignKey('leader.id'), nullable=True)
+    
+    date_id = Column(Integer, ForeignKey("attendance.date"))
+    status_id = Column(Integer, ForeignKey("attendance.status"))
+
+    date = relationship("Attendance", backref="attendnace", foreign_keys=[date_id], lazy=True)
+    status = relationship("Attendance", backref="attendance", foreign_keys=[status_id], lazy=True)
 
     def __repr__(self):
         return (f'Student(id={self.id}, '
                 f'last={self.last}, '
                 f'first={self.first}, '
                 f'middle={self.middle}, '
-                f'leader_id={self.leader_id})')
+                f'leader_id={self.leader_id}, '
+                f'date={self.date}, '
+                f'status={self.status}')
+
+    @property
+    def serialize(self):
+        return {'id': self.id, 
+                'last': self.last,
+                'first': self.first,
+                'middle': self.middle,
+                'leader_id': self.leader_id,
+                'date': self.date,
+                'status': self.status}
+
 
 
 class Attendance(Base):
@@ -58,3 +84,10 @@ class Attendance(Base):
                 f'date={self.date}, '
                 f'status={self.status}, '
                 f'leader_id={self.leader_id})')
+    
+    @property
+    def serialize(self):
+        return {'id': self.id, 
+                'date': self.date,
+                'status': self.status,
+                'leader_id': self.leader_id}

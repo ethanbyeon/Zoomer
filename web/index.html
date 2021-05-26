@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, intital-scale=1">
+    <title>Neat-O-Matic</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    
+    <link href="/static/css/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  </head>
+  <body>
+    <main>
+      <section class="glass">
+        <div class="dashboard">
+          <div class="remote">
+            <h3>Neat-O-Matic</h3>
+            <p>E.Y.B.</p>
+          </div>
+          <div class="links">
+            <div class="link">
+              <label id="roster" class="fade" onclick="getPath('roster')">
+                <span class="material-icons md-light">
+                  file_upload
+                </span>
+                <h2>Upload</h2>
+              </label>
+            </div>
+            <div class="link">
+              <label id="student" class="fade" onclick="take_attendance('STUDENTS')">
+                <span class="material-icons md-light">
+                  people
+                  </span>
+                <h2>Students</h2>
+              </label>
+            </div>
+            <div class="link">
+              <label id="leader" class="fade" onclick="take_attendance('LEADERS')">
+                <span class="material-icons md-light">
+                  confirmation_number
+                </span>
+                <h2>Leaders</h2>
+              </label>
+            </div>
+            <div class="link">
+              <label id="export_btn" class="fade" onclick="getPath('export_btn')">
+                <span class="material-icons md-light">
+                  file_download
+                </span>
+                <h2>Export</h2>
+              </label>
+            </div>
+          </div>
+          <div class="extra">
+            <h2>Extra</h2>
+          </div>
+        </div>
+        <div class="attendance">
+          <div class="status">
+            <h1>Database</h1>
+            <input type="text" id="search" placeholder="Search"/>
+          </div>
+          <div class="table">
+            <table class="content-table">
+              <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>STATUS</th>
+                    <th>ADMIT TIME</th>
+                </tr>
+              </thead>
+              <tbody id="data">
+                <tr>
+                  <td>123456</td>
+                  <td>JOE SMITH</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>JOHN DOE</td>
+                  <td>PRESENT</td>
+                  <td>00:00:13</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>HAL JORDAN</td>
+                  <td>ABSENT</td>
+                  <td>00:00:14</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>CLARK KENT</td>
+                  <td>PRESENT</td>
+                  <td>00:00:15</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+                <tr>
+                  <td>123456</td>
+                  <td>JOHN DOE</td>
+                  <td>ABSENT</td>
+                  <td>00:00:12</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="text/javascript" src="/static/js/setup.js"></script>
+  </body>
+</html>

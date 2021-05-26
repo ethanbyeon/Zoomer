@@ -1,8 +1,10 @@
 import capture
 import datetime
-import numpy as np
+import eel
 import pandas as pd
 import pyautogui as pug
+
+from sqlalchemy import select, insert, update
 
 from tables import (Base, 
                     engine,
@@ -11,9 +13,8 @@ from tables import (Base,
                     Student,
                     Session)
 
-from sqlalchemy import select, insert, update
 
-
+@eel.expose
 def setup_df(input_file):
     df = pd.read_csv(input_file, header=None)
     f_row = df.iloc[0].str.match(r"([A-Z][-a-zA-Z]*'?[-a-zA-Z]+), ([A-Z][a-z]*'?[-a-zA-Z]+)( [A-Z]'?[-a-zA-Z]*)? (\((\d{6})?\))?")
@@ -48,9 +49,19 @@ def setup_df(input_file):
                 dt = datetime.datetime.now()
                 dt_format = dt.strftime('%m/%d/%Y %H:%M:%S')
                 t = datetime.datetime.strptime(dt_format, '%m/%d/%Y %H:%M:%S')
-        
+                # FIX CHECKING SAME FILE BEING INPUT TO DB
                 attn_table = insert(Attendance).values(id=int(student_id), date=t, status="ABSENT")
                 conn.execute(attn_table)
+
+    with Session(engine) as session, session.begin():
+        people = session.execute(
+            select(Student).\
+            order_by(Student.last)
+        ).scalars().all()
+
+        data = [user.serialize for user in people]
+        print(data)
+        eel.create_table(data)
 
 
 def check_screen():
@@ -89,7 +100,8 @@ def validate_students():
         students = session.execute(
             select(Student, Attendance).\
             where(Student.id == Attendance.id).\
-            where(Attendance.status == "ABSENT")
+            where(Attendance.status == "ABSENT").\
+            order_by(Student.last)
         ).scalars().all()
 
         for student in students:
@@ -98,13 +110,14 @@ def validate_students():
 
         search(students)
 
-
+@eel.expose
 def validate_leaders():
     with Session(engine) as session, session.begin():
         leaders = session.execute(
             select(Leader, Attendance).\
             where(Leader.id == Attendance.id).\
-            where(Attendance.status == "ABSENT")
+            where(Attendance.status == "ABSENT").\
+            order_by(Leader.last)
         ).scalars().all()
 
         for leader in leaders:
@@ -117,9 +130,10 @@ def validate_leaders():
 def search(absent_list):
     global search_bar, width
 
-    for user in absent_list:
+    for index, user in enumerate(absent_list):
         name = f'{user.first} {user.last}'
         
+        print(f"{len(absent_list) - index} remaining...")
         print(f"[?] Searching  : {name}")
         pug.click(search_bar)
         pug.typewrite(name)
@@ -154,24 +168,35 @@ def search(absent_list):
             print("Could not locate labels.")
             return f'Could not<br/>locate labels.'
 
+    with Session(engine) as session, session.begin():
+        students = session.execute(
+            select(Student).\
+            order_by(Student.last)
+        ).scalars().all()
+        print("BOOM", students)
+        data = [usr.serialize for usr in students]
+        eel.create_table(data)
+
 
 def record(user):
-    with Session(engine) as session, session.begin():
+    with engine.begin() as conn:
         print(user)
 
         dt = datetime.datetime.now()
         dt_format = dt.strftime('%m/%d/%Y %H:%M:%S')
         t = datetime.datetime.strptime(dt_format, '%m/%d/%Y %H:%M:%S')
 
-        session.execute(
-            update(Attendance).\
+        usr = update(Attendance).\
             where(user.id == Attendance.id).\
             where(Attendance.status == "ABSENT").\
             values(status="PRESENT").\
             values(date=t).\
             execution_options(synchronize_session="fetch")
-        )
-        print(session.execute(select(Attendance).where(Attendance.status=="PRESENT")).scalars().all())
+
+        conn.execute(usr)
+        
+        # print(conn.execute(select(Attendance).where(Attendance.status=="PRESENT")).scalars().all())
+
 
 def admit(name, wait_list):
     global x, y

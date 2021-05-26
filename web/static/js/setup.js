@@ -60,3 +60,82 @@ async function home() {
     container.style.display = "none";
     remote.style.display = "flex";
 }
+
+
+eel.expose(create_table);
+function create_table(x) {
+    var data = x;
+    console.log("HELLO WORLD!");
+    console.log(x);
+    console.log(`USERS (${data.length} results)`);
+    let table = document.getElementById('data');
+    table.innerHTML = `
+        ${data.map(function(user) {
+            return `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.last}, ${user.first}${user.middle ? ' ' + user.middle : ''}</td>
+                <td>${user.status ? user.status : 'UNKNOWN'}</td>
+                <td>${user.date ?  user.date : 'NA'}</td>
+            </tr>
+            `
+        }).join('')}
+    `;
+}
+
+// FILTER
+document.getElementById("search").onkeyup = function() {
+    let query = this.value.toUpperCase();
+    let table = document.getElementsByTagName('table');
+    console.log(table);
+    
+    console.log(query);
+    let rows = document.querySelectorAll('tbody tr');
+    console.log(rows);
+    rows.forEach(row => {
+        row.querySelector('td').textContent.toLowerCase().indexOf(query) > -1
+        ? row.style.display = ''
+        : row.style.display = 'none';
+        console.log(row);
+    });
+};
+
+// TABLE SORT
+/**
+ * Sorts an HTML table.
+ * 
+ * @param {HTMLTableElement} table The table to sort
+ * @param {number} column The index of the column to sort
+ * @param {boolean} asc Determines if the sorting will be in ascending/descending
+ */
+function sortTableByColumn(table, column, asc=true) {
+    const dirModifier = asc ? 1: -1;
+    const tBody = table.tBodies[0];
+    const rows = Array.from(tBody.querySelectorAll("tr"));
+
+    const sortedRows = rows.sort((a, b) => {
+        const aColText = a.querySelector(`td:nth-child(${ column + 1})`).textContent.trim();
+        const bColText = b.querySelector(`td:nth-child(${ column + 1})`).textContent.trim();
+
+        return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
+    });
+
+    while(tBody.firstChild) {
+        tBody.removeChild(tBody.firstChild);
+    }
+    tBody.append(...sortedRows);
+
+    table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
+    table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-asc", asc);
+    table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
+}
+
+document.querySelectorAll(".content-table th").forEach(headerCell => {
+    headerCell.addEventListener("click", () => {
+        const tableElement = headerCell.parentElement.parentElement.parentElement;
+        const headerIndex = Array.prototype.indexOf.call(headerCell.parentElement.children, headerCell);
+        const currentIsAscending = headerCell.classList.contains("th-sort-asc");
+
+        sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
+    });
+});
