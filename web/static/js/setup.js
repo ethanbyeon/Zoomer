@@ -13,15 +13,16 @@ async function getPath(x) {
         var filename = path.replace(/^.*[\\\/]/, '')
 
         if(x === 'roster'){
-            let out = '<ion-icon name="people"></ion-icon><br/>CLASS ROSTER:<br/>';
-            btn.innerHTML = out + filename;
-            console.log('CLASS ROSTER:\n' + filename);
+            let out = `<span class="material-icons md-light">file_upload</span>
+                        <h2>${filename}</h2>`;
+            btn.innerHTML = out;
+            console.log('ROSTER:\n' + filename);
             btn.style.backgroundColor = '#C2D076'
             btn.style.color = '#F0F7F4';
         }else if(x === 'export_btn') {
-            let out = '<ion-icon name="clipboard"></ion-icon><br/>ATTENDANCE SHEET:<br/>';
+            let out = `<span class="material-icons md-light">assessment</span>`;
             btn.innerHTML = out + filename;
-            console.log('ATTENDANCE SHEET:\n' + filename);
+            console.log('EXPORT:\n' + filename);
             btn.style.backgroundColor = '#C2D076'
             btn.style.color = '#F0F7F4';
         }
@@ -31,12 +32,12 @@ async function getPath(x) {
 
 eel.expose(take_attendance);
 async function take_attendance(x) {
-    let out_div = document.getElementById('output');
-    out_div.style.fontSize = "18px";
-    out_div.innerHTML = `Please Wait<br/>Admitting ${x}...`;
+    // let out_div = document.getElementById('output');
+    // out_div.style.fontSize = "18px";
+    // out_div.innerHTML = `Please Wait<br/>Admitting ${x}...`;
     
     let attendance = await eel.admit(x)();
-    out_div.innerHTML = attendance;
+    // out_div.innerHTML = attendance;
 
     console.log(attendance);
 }
@@ -68,7 +69,7 @@ function create_table(x) {
     console.log("HELLO WORLD!");
     console.log(x);
     console.log(`USERS (${data.length} results)`);
-    let table = document.getElementById('data');
+    let table = document.getElementsByTagName("tbody")[0];
     table.innerHTML = `
         ${data.map(function(user) {
             return `
@@ -114,8 +115,8 @@ function sortTableByColumn(table, column, asc=true) {
     const rows = Array.from(tBody.querySelectorAll("tr"));
 
     const sortedRows = rows.sort((a, b) => {
-        const aColText = a.querySelector(`td:nth-child(${ column + 1})`).textContent.trim();
-        const bColText = b.querySelector(`td:nth-child(${ column + 1})`).textContent.trim();
+        const aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+        const bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
 
         return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
     });
@@ -130,12 +131,12 @@ function sortTableByColumn(table, column, asc=true) {
     table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
 }
 
-document.querySelectorAll(".content-table th").forEach(headerCell => {
+document.querySelectorAll(".content-table th:not(:first-child)").forEach(headerCell => {
     headerCell.addEventListener("click", () => {
         const tableElement = headerCell.parentElement.parentElement.parentElement;
         const headerIndex = Array.prototype.indexOf.call(headerCell.parentElement.children, headerCell);
         const currentIsAscending = headerCell.classList.contains("th-sort-asc");
-
+        console.log(tableElement);
         sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
     });
 });

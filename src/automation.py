@@ -195,7 +195,7 @@ def record(user):
 
         conn.execute(usr)
         
-        # print(conn.execute(select(Attendance).where(Attendance.status=="PRESENT")).scalars().all())
+        print(conn.execute(select(Attendance).where(Attendance.status=="PRESENT")).scalars().all())
 
 
 def admit(name, wait_list):

@@ -12,9 +12,9 @@
   </head>
   <body>
     <main>
-      <section class="glass">
-        <div class="dashboard">
-          <div class="remote">
+      <div class="app">
+        <div class="sidebar">
+          <div class="description">
             <h3>Neat-O-Matic</h3>
             <p>E.Y.B.</p>
           </div>
@@ -38,7 +38,7 @@
             <div class="link">
               <label id="leader" class="fade" onclick="take_attendance('LEADERS')">
                 <span class="material-icons md-light">
-                  confirmation_number
+                  people
                 </span>
                 <h2>Leaders</h2>
               </label>
@@ -56,93 +56,121 @@
             <h2>Extra</h2>
           </div>
         </div>
-        <div class="attendance">
-          <div class="status">
-            <h1>Database</h1>
+        <div class="dashboard">
+          <div class="search">
+            <h1>Dashboard</h1>
             <input type="text" id="search" placeholder="Search"/>
           </div>
-          <div class="table">
-            <table class="content-table">
-              <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>NAME</th>
-                    <th>STATUS</th>
-                    <th>ADMIT TIME</th>
-                </tr>
-              </thead>
-              <tbody id="data">
-                <tr>
-                  <td>123456</td>
-                  <td>JOE SMITH</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>9</td>
-                  <td>JOHN DOE</td>
-                  <td>PRESENT</td>
-                  <td>00:00:13</td>
-                </tr>
-                <tr>
-                  <td>8</td>
-                  <td>HAL JORDAN</td>
-                  <td>ABSENT</td>
-                  <td>00:00:14</td>
-                </tr>
-                <tr>
-                  <td>7</td>
-                  <td>CLARK KENT</td>
-                  <td>PRESENT</td>
-                  <td>00:00:15</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-                <tr>
-                  <td>123456</td>
-                  <td>JOHN DOE</td>
-                  <td>ABSENT</td>
-                  <td>00:00:12</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table class="content-table">
+            <thead>
+              <tr>
+                  <th>#</th>
+                  <th>NAME</th>
+                  <th>STATUS</th>
+                  <th>ADMIT TIME</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Albert</td>
+                <td>ABSENT</td>
+                <td>00:00:12</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Brian</td>
+                <td>PRESENT</td>
+                <td>00:00:13</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Chris</td>
+                <td>ABSENT</td>
+                <td>00:00:11</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Dave</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Elton</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Fred</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>Gerald</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>Harold</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>Ingrid</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>Jared</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td>KO</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>12</td>
+                <td>Larry</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>13</td>
+                <td>Larry</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>14</td>
+                <td>Larry</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>15</td>
+                <td>Larry</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+              <tr>
+                <td>16</td>
+                <td>Larry</td>
+                <td>PRESENT</td>
+                <td>00:00:15</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </section>
+      </div>
     </main>
     <script type="text/javascript" src="/static/js/setup.js"></script>
   </body>
