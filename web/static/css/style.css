@@ -34,12 +34,10 @@
     padding: 0px;
     box-sizing: border-box;
 }
-
 h1 {
     color: var(--void);
     font-weight: 600;
     font-size: 3rem;
-    /* opacity: 0.8; */
 }
 h2, p {
     color: var(--lvoid);
@@ -49,7 +47,6 @@ h3 {
     color: var(--void);
     font-weight: 600;
 }
-
 main {
     font-family: 'Poppins', sans-serif;
     text-transform: uppercase;
@@ -73,8 +70,10 @@ main {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    overflow: hidden;
 }
 
+/* SIDEBAR */
 .sidebar {
     flex: 0.3;
     height: 100%;
@@ -87,12 +86,14 @@ main {
     background: linear-gradient(rgba(255,255,255, 0.7), rgba(255, 255, 255, 0.3));
     transition: color 200ms ease-in;
 }
+
+.description {
+    margin: 1rem 0;
+}
+
 .link {
     display: flex;
     margin: 2px 0;
-}
-.link label h2 {
-    padding-right: 3rem;
 }
 .link label {
     display: flex;
@@ -104,14 +105,18 @@ main {
     height: 6rem;
     transition: background-color 200ms ease-in;
 }
-.link span {
-    padding: 0 2rem 0 1rem;
-}
-.link h2 { color: var(--snow); }
 .link label:hover {
     background-color: var(--caution);
     cursor: pointer;
 }
+.link label h2 {
+    padding-right: 3rem;
+}
+.link span {
+    padding: 0 2rem 0 1rem;
+}
+.link h2 { color: var(--snow); }
+
 
 /* DASHBOARD */
 .dashboard {
@@ -124,12 +129,8 @@ main {
     overflow: auto;
 }
 
-.search {
-    padding-bottom: 2rem;
-}
-.search h1 {
-    margin-top: 2rem;
-}
+.search { margin-bottom: 2rem; }
+.search h1 { margin-top: 3.5rem; }
 .search input {
     background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
     border: none;
@@ -138,11 +139,20 @@ main {
     border-radius: 5px;
 }
 
+.extra{
+    background-color: var(--lvoid);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+.extra h2 { color: var(--snow); }
+
+
 /* TABLE */
 .content-table {
+    flex: 1;
     width: 100%;
-    height: 100%;
-    min-width: 500px;
+    min-width: 530px;
     background-color: var(--snow);
     font-size: 0.9em;
     letter-spacing: 0.1rem;
@@ -187,12 +197,6 @@ main {
 .content-table .th-sort-asc::after,
 .content-table .th-sort-desc::after { margin-left: 5px; }
 
-.extra{
-    background-color: var(--lvoid);
-    border-radius: 10px;
-    padding: 1rem;
-}
-.extra h2 { color: var(--snow); }
 
 /* ANIMATIONS */
 .fade {
