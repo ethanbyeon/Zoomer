@@ -78,28 +78,31 @@ function create_table(x) {
                 <td>${user.last}, ${user.first}${user.middle ? ' ' + user.middle : ''}</td>
                 <td>${user.status ? user.status : 'UNKNOWN'}</td>
                 <td>${user.date ?  user.date : 'NA'}</td>
+                <td>
+                </td>
             </tr>
             `
         }).join('')}
     `;
 }
 
+
 // FILTER
-document.getElementById("search").onkeyup = function() {
-    let query = this.value.toUpperCase();
-    let table = document.getElementsByTagName('table');
-    console.log(table);
+search.addEventListener("keyup", function(event) {
+    let query = event.target.value.toLowerCase();
+    let rows = document.querySelectorAll("tbody tr");
     
-    console.log(query);
-    let rows = document.querySelectorAll('tbody tr');
-    console.log(rows);
     rows.forEach(row => {
-        row.querySelector('td').textContent.toLowerCase().indexOf(query) > -1
-        ? row.style.display = ''
-        : row.style.display = 'none';
-        console.log(row);
+        var firstCol = row.querySelector("td").textContent.toLowerCase();
+        var secondCol = row.querySelectorAll("td")[1].textContent.toLowerCase();
+        var thirdCol = row.querySelectorAll("td")[2].textContent.toLowerCase();
+
+        (firstCol.indexOf(query) > -1 || secondCol.indexOf(query) > -1 || thirdCol.indexOf(query) > -1)
+        ? row.style.display = ""
+        : row.style.display = "none";
     });
-};
+});
+
 
 // TABLE SORT
 /**
@@ -131,7 +134,7 @@ function sortTableByColumn(table, column, asc=true) {
     table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
 }
 
-document.querySelectorAll(".content-table th:not(:first-child)").forEach(headerCell => {
+document.querySelectorAll(".content-table th:not(:first-child):not(:last-child)").forEach(headerCell => {
     headerCell.addEventListener("click", () => {
         const tableElement = headerCell.parentElement.parentElement.parentElement;
         const headerIndex = Array.prototype.indexOf.call(headerCell.parentElement.children, headerCell);
