@@ -8,8 +8,7 @@ from sqlalchemy import select, insert, update
 
 from tables import (Base, 
                     engine,
-                    Attendance,
-                    Leader, 
+                    Attendance, 
                     Student,
                     Session)
 
@@ -31,36 +30,32 @@ def setup_df(input_file):
         c = series.str.extract(r"([A-Z][-a-zA-Z]*'?[-a-zA-Z]+), ([A-Z][a-z]*'?[-a-zA-Z]+)( [A-Z]'?[-a-zA-Z]*)? (\((\d{6})?\))?")
         c.drop(columns=3, inplace=True)
         c.dropna(how='all', inplace=True)
-        c['Leader_ID'] = c.iloc[0, 3]
         c.rename(columns={0:'Last', 1:'First', 2:'Middle', 4:'ID'}, inplace=True)
+        c.loc[c['ID'] != c.iloc[0, 3], 'Leader_ID'] = c.iloc[0, 3]
         c['ID'] = c['ID'].astype(int)
-        c['Leader_ID'] = c['Leader_ID'].astype(int)
+        c['Leader_ID'] = c['Leader_ID'].astype(float)
         dfs.append(c)
 
     with engine.begin() as conn:
         Base.metadata.create_all(conn)
 
         for r in dfs:
-            r.iloc[:1, :4].to_sql("leader", con=conn, if_exists='append', index=False)
-            r.iloc[:1, :4].to_sql("student", con=conn, if_exists='append', index=False)
-            r.iloc[1:].to_sql("student", con=conn, if_exists='append', index=False)
+            r.to_sql("student", con=conn, if_exists='append', index=False)
 
-            for student_id in r.iloc[:, 3]:
-                dt = datetime.datetime.now()
-                dt_format = dt.strftime('%m/%d/%Y %H:%M:%S')
-                t = datetime.datetime.strptime(dt_format, '%m/%d/%Y %H:%M:%S')
-                # FIX CHECKING SAME FILE BEING INPUT TO DB
-                attn_table = insert(Attendance).values(id=int(student_id), date=t, status="ABSENT")
-                conn.execute(attn_table)
+            with Session(engine) as session, session.begin():
+                for student_id in r.iloc[:, 3]:
+                    attendance = Attendance(student_id=student_id)
+                    session.add(attendance)
 
-    with Session(engine) as session, session.begin():
+    with Session(engine) as session:
         people = session.execute(
             select(Student).\
             order_by(Student.last)
         ).scalars().all()
 
         data = [user.serialize for user in people]
-        print(data)
+        # print(data)
+        # print("2:", session.execute(select(Attendance)).scalars().all())
         eel.create_table(data)
 
 
@@ -96,35 +91,26 @@ def attendance(category):
 
 
 def validate_students():
-    with Session(engine) as session, session.begin():
+    with Session(engine) as session:
         students = session.execute(
-            select(Student, Attendance).\
-            where(Student.id == Attendance.id).\
-            where(Attendance.status == "ABSENT").\
+            select(Student).\
             order_by(Student.last)
         ).scalars().all()
 
-        for student in students:
-            name = f'{student.first} {student.last}'
-            print(name)
-
-        search(students)
+        q = list(filter(lambda x : not x.today().status, students))
+    search(q)
 
 @eel.expose
 def validate_leaders():
-    with Session(engine) as session, session.begin():
+    with Session(engine) as session:
         leaders = session.execute(
-            select(Leader, Attendance).\
-            where(Leader.id == Attendance.id).\
-            where(Attendance.status == "ABSENT").\
-            order_by(Leader.last)
+            select(Student).\
+            where(Student.leader_id==None).\
+            order_by(Student.last)
         ).scalars().all()
-
-        for leader in leaders:
-            name = f'{leader.first} {leader.last}'
-            print(name)
-
-        search(leaders)
+        
+        q = list(filter(lambda x : not x.today().status, leaders))
+    search(q)
 
 
 def search(absent_list):
@@ -168,34 +154,24 @@ def search(absent_list):
             print("Could not locate labels.")
             return f'Could not<br/>locate labels.'
 
-    with Session(engine) as session, session.begin():
+    with Session(engine) as session:
         students = session.execute(
             select(Student).\
             order_by(Student.last)
         ).scalars().all()
-        print("BOOM", students)
+        
         data = [usr.serialize for usr in students]
         eel.create_table(data)
 
 
 def record(user):
-    with engine.begin() as conn:
-        print(user)
-
-        dt = datetime.datetime.now()
-        dt_format = dt.strftime('%m/%d/%Y %H:%M:%S')
-        t = datetime.datetime.strptime(dt_format, '%m/%d/%Y %H:%M:%S')
-
-        usr = update(Attendance).\
-            where(user.id == Attendance.id).\
-            where(Attendance.status == "ABSENT").\
-            values(status="PRESENT").\
-            values(date=t).\
-            execution_options(synchronize_session="fetch")
-
-        conn.execute(usr)
+    with Session(engine) as session, session.begin():
+        t = user.today()
+        t.status = True
+        session.add(t)
         
-        print(conn.execute(select(Attendance).where(Attendance.status=="PRESENT")).scalars().all())
+    # with Session(engine) as session:
+    #     print(session.execute(select(Attendance).where(Attendance.status==True)).scalars().all())
 
 
 def admit(name, wait_list):

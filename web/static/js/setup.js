@@ -32,13 +32,7 @@ async function getPath(x) {
 
 eel.expose(take_attendance);
 async function take_attendance(x) {
-    // let out_div = document.getElementById('output');
-    // out_div.style.fontSize = "18px";
-    // out_div.innerHTML = `Please Wait<br/>Admitting ${x}...`;
-    
     let attendance = await eel.admit(x)();
-    // out_div.innerHTML = attendance;
-
     console.log(attendance);
 }
 
@@ -76,10 +70,8 @@ function create_table(x) {
             <tr>
                 <td>${user.id}</td>
                 <td>${user.last}, ${user.first}${user.middle ? ' ' + user.middle : ''}</td>
-                <td>${user.status ? user.status : 'UNKNOWN'}</td>
+                <td>${user.status ? 'PRESENT' : 'ABSENT'}</td>
                 <td>${user.date ?  user.date : 'NA'}</td>
-                <td>
-                </td>
             </tr>
             `
         }).join('')}
