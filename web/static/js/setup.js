@@ -9,9 +9,7 @@ async function getPath(x) {
     }
     
     if(path) {
-        console.log(path);
         var filename = path.replace(/^.*[\\\/]/, '')
-
         if(x === 'roster'){
             let out = `<span class="material-icons md-light">file_upload</span>
                         <h2>${filename}</h2>`;
@@ -33,36 +31,15 @@ async function getPath(x) {
 eel.expose(take_attendance);
 async function take_attendance(x) {
     let attendance = await eel.admit(x)();
-    console.log(attendance);
 }
 
 
-eel.expose(dashboard);
-async function dashboard() {
-    let container = document.getElementById('dashboard');
-    let remote = document.getElementById('remote');
-
-    container.style.display = "flex";
-    remote.style.display = "none";
-}
-
-
-eel.expose(home);
-async function home() {
-    let container = document.getElementById('dashboard');
-    let remote = document.getElementById('remote');
-    
-    container.style.display = "none";
-    remote.style.display = "flex";
-}
-
-
+// CREATE TABLE
 eel.expose(create_table);
 function create_table(x) {
     var data = x;
-    console.log("HELLO WORLD!");
-    console.log(x);
     console.log(`USERS (${data.length} results)`);
+    console.log(x);
     let table = document.getElementsByTagName("tbody")[0];
     table.innerHTML = `
         ${data.map(function(user) {
@@ -72,6 +49,11 @@ function create_table(x) {
                 <td>${user.last}, ${user.first}${user.middle ? ' ' + user.middle : ''}</td>
                 <td>${user.status ? 'PRESENT' : 'ABSENT'}</td>
                 <td>${user.date ?  user.date : 'NA'}</td>
+                <td>
+                    <button onclick="updateStatus(this)" style="background-color:${user.status ? '#C2D076' : '#F2545B'}">
+                        ${user.status ? 'PRESENT' : 'ABSENT'}
+                    </button>
+                </td>
             </tr>
             `
         }).join('')}
@@ -135,3 +117,22 @@ document.querySelectorAll(".content-table th:not(:first-child):not(:last-child)"
         sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
     });
 });
+
+
+eel.expose(updateStatus);
+async function updateStatus(button) {
+    let row = button.parentElement.parentElement;
+    let status = button.firstChild.nodeValue;
+
+    if (status == "PRESENT") {
+        status = "ABSENT";
+        button.style.backgroundColor = '#F2545B';
+    }else {
+        status = "PRESENT";
+        button.style.backgroundColor = '#C2D076';
+    }
+    button.firstChild.nodeValue = status;
+    row.cells[2].innerHTML = status;
+    
+    let update = await eel.updateStatus(row.cells[0].innerHTML)();
+}

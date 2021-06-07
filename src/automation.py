@@ -48,14 +48,12 @@ def setup_df(input_file):
                     session.add(attendance)
 
     with Session(engine) as session:
-        people = session.execute(
+        students = session.execute(
             select(Student).\
             order_by(Student.last)
         ).scalars().all()
 
-        data = [user.serialize for user in people]
-        # print(data)
-        # print("2:", session.execute(select(Attendance)).scalars().all())
+        data = [student.serialize for student in students]
         eel.create_table(data)
 
 
@@ -169,9 +167,24 @@ def record(user):
         t = user.today()
         t.status = True
         session.add(t)
-        
-    # with Session(engine) as session:
-    #     print(session.execute(select(Attendance).where(Attendance.status==True)).scalars().all())
+
+
+@eel.expose
+def updateStatus(id):
+    with Session(engine) as session, session.begin():
+        student = session.execute(
+            select(Student).\
+            where(Student.id==id)
+        ).scalars().all()
+
+        for index, usr in enumerate(student):
+            s = usr.today()
+            if not s.status:
+                s.status = True
+            else:
+                s.status = False
+            session.add(s)
+        # print(session.execute(select(Attendance)).scalars().all())
 
 
 def admit(name, wait_list):

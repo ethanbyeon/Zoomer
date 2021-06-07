@@ -206,6 +206,17 @@ main {
 .content-table .th-sort-desc::after { content: "\25be";}
 .content-table .th-sort-asc::after,
 .content-table .th-sort-desc::after { margin-left: 5px; }
+.content-table button {
+    border: none;
+    border-radius: 10px;
+    width: 100px;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.1rem;
+    color: var(--snow);
+    background-color: var(--danger);
+}
 
 
 /* ANIMATIONS */
@@ -230,7 +241,3 @@ main {
     from {opacity:0;}
     to {opacity:1;}
 }
-
-/* @media screen and (max-width: 530px) {
-    .flex
-} */
