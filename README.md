@@ -1,1 +1,1 @@
-# NZA (Neato Zoom Automation)
+# Neat-O-Matic
